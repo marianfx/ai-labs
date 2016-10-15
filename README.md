@@ -5,7 +5,7 @@
 ```
 This is the Artificial Intelligence Repo, @FX.
 ```
-#### Most of the written in:
+#### Most of *code* is written in:
   - Python 3.5
 
 #### Useful links:
