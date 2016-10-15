@@ -3,7 +3,10 @@
 
 #### Details:
 ```
-2p: Implementati un mic chatbot cu memorie: retine numele, varsta si ocupatia a doi interlocutori. Datele despre fiecare utilizator sunt retinute dupa o interogare initiala. Robotelul poate pune intrebari personalizate pentru fiecare utilizator, dupa identificarea lui. Intrebarile personalizate tin cont de nume, varsta si ocupatie si sunt stocate intr-o resursa externa aplicatiei.
+2p: Implementati un mic chatbot cu memorie: retine numele, varsta si ocupatia a doi interlocutori.
+Datele despre fiecare utilizator sunt retinute dupa o interogare initiala.
+Robotelul poate pune intrebari personalizate pentru fiecare utilizator, dupa identificarea lui.
+Intrebarile personalizate tin cont de nume, varsta si ocupatie si sunt stocate intr-o resursa externa aplicatiei.
 Bonus 1p: Implementati baza de cunostinte in AIML.
 ```
 #### Tools used:
