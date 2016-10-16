@@ -6,37 +6,80 @@ import sys
 class BacktrackHanoiSolver(HanoiSolver):
     """Solves the Hanoi using backtrack."""
 
-    def __init__(self, n, m):
+    def __init__(self, n, m, only_first = False):
         super(BacktrackHanoiSolver, self).__init__(n, m)
         sys.setrecursionlimit(2 ** 20)
+        self.previous = []
+        self.strategy_name = "Backtracking"
+        self.only_first = only_first
+        self.solution_found = False
 
-    def run_solver(self):
-        print ("Starting bactracking.")
-        self.back(1, 1)
-        print("Details:")
-        print("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
-        print("Solutions:")
-        for sol in self.solutions:
-            print (sol)
+    def get_all_starting_disks(self):
+        """:returns: A list of disks which can be moves."""
+        output = []
+        for tower in range(1, self.n + 1):
+            try:
+                top_from_tower = self.current_state[1:].index(tower) + 1
+                output.append(top_from_tower)
+            except ValueError:
+                continue
+        return output
 
-    def back(self, ti, tj):
-        """The backtracking for transitioning.
+    def get_moves_for_a_disk(self, disk):
+        output = []
+        its_tower = self.current_state[disk]
+        for tower in range(1, self.n + 1):
+            if self.is_valid_transition(its_tower, tower):
+                output.append((its_tower, tower))
+        return output
 
-        :param ti: The tower to start from.
-        :param tj: The tower to end in.
+    def get_all_available_moves(self):
+        """Given current state, returns all possible moves available."""
+        output = []
+        valid_disks = self.get_all_starting_disks()
+        for disk in valid_disks:
+            moves = self.get_moves_for_a_disk(disk)
+            output.extend(moves)
+        return output
+
+    def strategy(self):
+        """The strategy uses backtracking for transitioning.
+
+        Details: 
+            - If we encountered the final state, we have a solution.
+            - We get a list with all the available moves from the current state.
+            - For each move:
+                - We check if it's valid (should be).
         """
+        
+        if self.solution_found and self.only_first:
+            return
 
         # transitions achieved final state
         if self.is_in_final_state():
+            self.solution_found = True
             self.run_on_final_state()
             return True
 
-        # continue generating transitions (towers, so 1 .. n)
-        for i in list(set(self.current_state[1:])):
-            for j in range(tj, self.n + 1):
-                if self.is_valid_transition(i, j) is True:
-                    self.do_transition(i, j)
-                    # print ("Done transition.")
-                    self.back(i, j)
-                    # print ("Back again.")
-                    self.undo_transition(i, j)
+        moves = self.get_all_available_moves()
+
+        for move in moves:
+            tower_i = move[0]
+            tower_j = move[1]
+            i = self.current_state[1:].index(tower_i) + 1
+
+            # Stop if invalid transition
+            #if self.is_valid_transition(tower_i, tower_j) is False:
+            #    continue
+
+            transition = self.do_transition(tower_i, tower_j)
+
+            # Stop if existing transition
+            if tuple(transition) in self.previous:
+                self.undo_transition(i, tower_i, tower_j)
+                continue
+            
+            self.previous.append(tuple(transition))
+            self.strategy()
+            del self.previous[-1]
+            self.undo_transition(i, tower_i, tower_j)
