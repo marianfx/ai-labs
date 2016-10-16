@@ -121,9 +121,9 @@ class HanoiSolver(object):
         print ("Finished.")
         print ("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
         print ("Details in file.")
-        # print("Solutions:")
-        # for sol in self.solutions:
-        #     print (sol)
+        print("Solutions:")
+        for sol in self.solutions:
+            print (sol)
 
 
 if __name__ == "__main__":
@@ -137,3 +137,13 @@ if __name__ == "__main__":
     hanoi_solver.run_solver()
     diff = ctime_millis() - start_time
     print("Time passed: {tt}".format(tt=nice_time(diff)))
+
+    # from  random_hanoi_solver import RandomHanoiSolver
+    # from nice_timings import *
+    #
+    # start_time = ctime_millis()
+    #
+    # hanoi_solver = RandomHanoiSolver(3, 8)
+    # hanoi_solver.run_solver()
+    # diff = ctime_millis() - start_time
+    # print("Time passed: {tt}".format(tt=nice_time(diff)))
