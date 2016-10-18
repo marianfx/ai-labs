@@ -123,6 +123,7 @@ class HanoiSolver(object):
         # print (
         #     "Finished.\nState: {state}."
         #     .format(state=self.get_current_state()))
+        self.solution_found = True
         self.number_of_solutions += 1
         self.solutions.append(list(self.tempsolutions))
 

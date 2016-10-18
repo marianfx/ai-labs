@@ -52,10 +52,10 @@ class BacktrackHanoiSolver(HanoiSolver):
 
         # transitions achieved final state
         if self.is_in_final_state():
-            self.solution_found = True
             self.run_on_final_state()
             return True
 
+        # get a list of all the valid available moves, so we can backtrack'em
         moves = self.get_all_available_moves()
 
         for move in moves:
