@@ -30,37 +30,39 @@ class HanoiSolver(object):
         """:returns: the current state."""
         return (self.current_state)
 
-    def get_all_starting_disks(self):
+    def get_all_starting_disks(self, state):
         """:returns: A list of disks which can be moves."""
         output = []
         for tower in range(1, self.n + 1):
             try:
-                top_from_tower = self.current_state[1:].index(tower) + 1
+                top_from_tower = state[1:].index(tower) + 1
                 output.append(top_from_tower)
             except ValueError:
                 continue
         return output
 
-    def get_moves_for_a_disk(self, disk):
+    def get_moves_for_a_disk(self, disk, state):
         """:returns: A list of available moves for a disk."""
         output = []
-        its_tower = self.current_state[disk]
+        its_tower = state[disk]
         for tower in range(1, self.n + 1):
-            if self.is_valid_transition(its_tower, tower):
+            if self.is_valid_transition(its_tower, tower, state):
                 output.append((its_tower, tower))
         return output
 
-    def get_all_available_moves(self):
+    def get_all_available_moves(self, state=None):
         """:returns: A list of all available moves, given current state.
                      The result is a tuple list of (tower_i, tower_j)"""
+        if state is None:
+            state = self.current_state
         output = []
-        valid_disks = self.get_all_starting_disks()
+        valid_disks = self.get_all_starting_disks(state)
         for disk in valid_disks:
-            moves = self.get_moves_for_a_disk(disk)
+            moves = self.get_moves_for_a_disk(disk, state)
             output.extend(moves)
         return output
 
-    def is_valid_transition(self, tower_i, tower_j):
+    def is_valid_transition(self, tower_i, tower_j, state=None):
         """Checks wether a transition is valid or not.
 
         We try to move from tower i to tower j.
@@ -70,7 +72,8 @@ class HanoiSolver(object):
             - The piece from tower i must be smaller than the one from tower j.
         :returns: True if valid state, False otherwise.
         """
-
+        if state is None:
+            state = self.current_state
         # basic tests
         if not (1 <= tower_i <= self.n):
             return False
@@ -80,12 +83,12 @@ class HanoiSolver(object):
             return False
 
         try:
-            top_from_tower_i = self.current_state[1:].index(tower_i) + 1
+            top_from_tower_i = state[1:].index(tower_i) + 1
         except ValueError:  # Not found means tryin to move inexistent.
             return False
 
         try:
-            top_from_tower_j = self.current_state[1:].index(tower_j) + 1
+            top_from_tower_j = state[1:].index(tower_j) + 1
         except ValueError:  # Not found means empty.
             return True
 
