@@ -26,17 +26,39 @@ class HanoiSolver(object):
         self.solutions = []
         self.tempsolutions = []
 
-    def is_in_final_state(self):
-        """Checks if current_state is final.
-
-        :param current_state: (n, x, x, ..., x)
-        :returns: True if the given state is final.
-        """
-        return self.current_state == self.final_state
-
     def get_current_state(self):
         """:returns: the current state."""
         return (self.current_state)
+
+    def get_all_starting_disks(self):
+        """:returns: A list of disks which can be moves."""
+        output = []
+        for tower in range(1, self.n + 1):
+            try:
+                top_from_tower = self.current_state[1:].index(tower) + 1
+                output.append(top_from_tower)
+            except ValueError:
+                continue
+        return output
+
+    def get_moves_for_a_disk(self, disk):
+        """:returns: A list of available moves for a disk."""
+        output = []
+        its_tower = self.current_state[disk]
+        for tower in range(1, self.n + 1):
+            if self.is_valid_transition(its_tower, tower):
+                output.append((its_tower, tower))
+        return output
+
+    def get_all_available_moves(self):
+        """:returns: A list of all available moves, given current state.
+                     The result is a tuple list of (tower_i, tower_j)"""
+        output = []
+        valid_disks = self.get_all_starting_disks()
+        for disk in valid_disks:
+            moves = self.get_moves_for_a_disk(disk)
+            output.extend(moves)
+        return output
 
     def is_valid_transition(self, tower_i, tower_j):
         """Checks wether a transition is valid or not.
@@ -89,19 +111,13 @@ class HanoiSolver(object):
         self.tempsolutions.append((tower_i, tower_j))
         return self.current_state
 
-    def undo_transition(self, i, tower_i, tower_j):
-        """Undo the transition from tower i to tower j.
+    def is_in_final_state(self):
+        """Checks if current_state is final.
 
-        :param i: The disk which was moved.
+        :param current_state: (n, x, x, ..., x)
+        :returns: True if the given state is final.
         """
-        self.current_state[i] = tower_i
-        # print ("Undo: disk {d} from {s} to {f}.".format(
-        #     d=str(top_from_tower_j),
-        #     s=str(tower_j),
-        #     f=str(tower_i)))
-        # print (self.get_current_state())
-        del self.tempsolutions[-1]
-        return self.current_state
+        return self.current_state == self.final_state
 
     def run_on_final_state(self):
         # print (
@@ -121,29 +137,25 @@ class HanoiSolver(object):
         print ("Finished.")
         print ("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
         print ("Details in file.")
-        print("Solutions:")
-        for sol in self.solutions:
-            print (sol)
+        # print("Solutions:")
+        # for sol in self.solutions:
+        #     print (sol)
 
 
 if __name__ == "__main__":
 
     from backtrack_hanoi_solver import BacktrackHanoiSolver
+    from random_hanoi_solver import RandomHanoiSolver
     from nice_timings import *
 
+    strategy = "backtracking"
     start_time = ctime_millis()
 
-    hanoi_solver = BacktrackHanoiSolver(3, 8, True)
+    if strategy == "backtracking":
+        hanoi_solver = BacktrackHanoiSolver(3, 8, True)
+    elif strategy == "random":
+        hanoi_solver = RandomHanoiSolver(3, 8, True)
+
     hanoi_solver.run_solver()
     diff = ctime_millis() - start_time
     print("Time passed: {tt}".format(tt=nice_time(diff)))
-
-    # from  random_hanoi_solver import RandomHanoiSolver
-    # from nice_timings import *
-    #
-    # start_time = ctime_millis()
-    #
-    # hanoi_solver = RandomHanoiSolver(3, 8)
-    # hanoi_solver.run_solver()
-    # diff = ctime_millis() - start_time
-    # print("Time passed: {tt}".format(tt=nice_time(diff)))

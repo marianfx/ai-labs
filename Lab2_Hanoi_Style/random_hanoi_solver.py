@@ -32,10 +32,12 @@ class RandomHanoiSolver(HanoiSolver):
         """The strategy uses optimised random  for transitioning.
 
         Details:
-            - if the greatest disk reaches last position then transition for this after is invalide
-                and the same for next lowest disk so on until all disks don't reach the final state.
+            - if the greatest disk reaches last position
+            then transition for this after is invalide.
+            do thesame for next lowest disk so on,
+            until all disks don't reach the final state.
             - We reduce in this way transition space and get some time and .
-            - atribute last_good is index lowest disk that reached final position
+            - last_good = index of the lowest disk that reached final position
         """
         while not self.is_in_final_state():
             tower_i, tower_j = self.random()
