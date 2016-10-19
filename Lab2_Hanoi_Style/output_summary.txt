@@ -1,0 +1,8 @@
+
+The result for random strategy, after running 10  inputs from inputs.txt are:
+        *Nr Fails: 0
+        *Nr Success: 10
+        *Average Moves: 43982
+        *Average Time: 2470
+
+            

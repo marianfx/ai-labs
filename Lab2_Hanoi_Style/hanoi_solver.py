@@ -169,8 +169,6 @@ if __name__ == "__main__":
     strategy = "a*"
     # strategy = "backtracking"
     # strategy = "hill_climbing"
-    start_time = ctime_millis()
-
     if strategy == "backtracking":
         hanoi_solver = BacktrackHanoiSolver(3, 1)
     elif strategy == "random":
@@ -180,5 +178,4 @@ if __name__ == "__main__":
     elif strategy == "a*":
         hanoi_solver = AStarHanoiSolver(3, 6)
     hanoi_solver.run_solver()
-    diff = ctime_millis() - start_time
-    print("Time passed: {tt}".format(tt=nice_time(diff)))
+
