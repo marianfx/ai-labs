@@ -1,4 +1,4 @@
-
+from nice_timings import *
 class HanoiSolver(object):
     '''The Generic Hanoi Solver Class, for the Hanoi Tower problem.
 
@@ -92,7 +92,7 @@ class HanoiSolver(object):
         except ValueError:  # Not found means empty.
             return True
 
-        if(top_from_tower_i > top_from_tower_j):
+        if (top_from_tower_i > top_from_tower_j):
             return False
 
         return True
@@ -134,16 +134,27 @@ class HanoiSolver(object):
         pass
 
     def run_solver(self):
-        print ("I am trying to solve the problem.")
-        print ("Using strategy: {s}".format(s=self.strategy_name))
-        print ("Please wait....")
+
+        start_time = ctime_millis()
+
+        print("I am trying to solve the problem.")
+        print("Using strategy: {s}".format(s=self.strategy_name))
+        print("Please wait....")
         self.strategy()
-        print ("Finished.")
-        print ("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
-        print ("Details in file.")
+        print("Finished.")
+        print("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
+        print("Details in file.")
+        solution = None
+        if len(self.solutions) > 0:
+            # I have at least one solution
+            solution = self.solutions[0]
         # print("Solutions:")
         # for sol in self.solutions:
         #     print (sol)
+        diff = ctime_millis() - start_time
+        print("Time passed: {tt}".format(tt=nice_time(diff)))
+
+        return (diff, self.number_of_solutions, solution)
 
 
 if __name__ == "__main__":
@@ -151,17 +162,15 @@ if __name__ == "__main__":
     from backtrack_hanoi_solver import BacktrackHanoiSolver
     from random_hanoi_solver import RandomHanoiSolver
     from hill_climbing_solver import HillClimbingSolver
-    from nice_timings import *
 
     strategy = "hill_climbing"
-    start_time = ctime_millis()
 
     if strategy == "backtracking":
         hanoi_solver = BacktrackHanoiSolver(3, 8, True)
     elif strategy == "random":
         hanoi_solver = RandomHanoiSolver(3, 8)
     elif strategy == 'hill_climbing':
-        hanoi_solver = HillClimbingSolver(3,2)
-    hanoi_solver.run_solver()
-    diff = ctime_millis() - start_time
-    print("Time passed: {tt}".format(tt=nice_time(diff)))
+        hanoi_solver = HillClimbingSolver(3, 2)
+    solver_response = hanoi_solver.run_solver()
+    print(str(solver_response))
+    # print("Time passed: {tt}".format(tt=nice_time(diff)))
