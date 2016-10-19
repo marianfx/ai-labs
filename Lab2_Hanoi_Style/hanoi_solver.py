@@ -150,16 +150,18 @@ if __name__ == "__main__":
 
     from backtrack_hanoi_solver import BacktrackHanoiSolver
     from random_hanoi_solver import RandomHanoiSolver
+    from hill_climbing_solver import HillClimbingSolver
     from nice_timings import *
 
-    strategy = "backtracking"
+    strategy = "hill_climbing"
     start_time = ctime_millis()
 
     if strategy == "backtracking":
         hanoi_solver = BacktrackHanoiSolver(3, 8, True)
     elif strategy == "random":
-        hanoi_solver = RandomHanoiSolver(3, 8, True)
-
+        hanoi_solver = RandomHanoiSolver(3, 8)
+    elif strategy == 'hill_climbing':
+        hanoi_solver = HillClimbingSolver(3,2)
     hanoi_solver.run_solver()
     diff = ctime_millis() - start_time
     print("Time passed: {tt}".format(tt=nice_time(diff)))
