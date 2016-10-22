@@ -46,7 +46,6 @@ class AStarHanoiSolver(HanoiSolver):
             current = current.cameFrom[0]
         path.reverse()
         self.solutions = [path]
-        print (self.solutions)
 
     def strategy(self):
         """The strategy uses A*.
@@ -113,5 +112,4 @@ class AStarHanoiSolver(HanoiSolver):
                 tentative_state.cameFrom.append(current)
                 tentative_state.score = tentative_score
 
-        if self.end_state is None:
-            self.solution_found = False
+        self.number_of_solutions = 1

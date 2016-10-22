@@ -145,16 +145,12 @@ class HanoiSolver(object):
         print("Finished.")
         print("Nr. of solutions: {s}.".format(s=self.number_of_solutions))
         print("Details in file.")
-        solution = None
+        solution = []
         if len(self.solutions) > 0:
-            # I have at least one solution
             solution = self.solutions[0]
-        # print("Solutions:")
-        # for sol in self.solutions:
-        #     print (sol)
         diff = ctime_millis() - start_time
         print("Time passed: {tt}".format(tt=nice_time(diff)))
-
+        print (self.number_of_solutions)
         return (diff, self.number_of_solutions, solution)
 
 
@@ -166,11 +162,11 @@ if __name__ == "__main__":
     from astar_hanoi_solver import AStarHanoiSolver
 
 
-    strategy = "a*"
-    # strategy = "backtracking"
+    # strategy = "a*"
+    strategy = "backtracking"
     # strategy = "hill_climbing"
     if strategy == "backtracking":
-        hanoi_solver = BacktrackHanoiSolver(3, 1)
+        hanoi_solver = BacktrackHanoiSolver(3, 3)
     elif strategy == "random":
         hanoi_solver = RandomHanoiSolver(3, 8)
     elif strategy == 'hill_climbing':

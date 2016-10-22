@@ -23,6 +23,7 @@ class HillClimbingSolver(HanoiSolver):
         self.nr_returns = 0
         self.previous_down = False
         self.nr_down = 0
+        self.MAX_ITERATIONS = 100
 
     def score(self, state=None):
         score = 0
@@ -82,7 +83,7 @@ class HillClimbingSolver(HanoiSolver):
                     self.nr_down = 0
                     self.return_to_key_state()
                     self.nr_returns += 1
-                    if self.nr_returns > 1000:
+                    if self.nr_returns > self.MAX_ITERATIONS:
                         break
                     continue
                 else:
