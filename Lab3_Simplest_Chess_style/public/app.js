@@ -301,7 +301,7 @@ exports.prepareChessBoard = prepareChessBoard;
 exports.movePieceVisually = movePieceVisually;
 
 },{"sweetAlert":13}],3:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -323,7 +323,7 @@ var Pawn = function () {
     }
 
     _createClass(Pawn, [{
-        key: "X",
+        key: 'X',
         get: function get() {
             return this.x;
         },
@@ -331,7 +331,7 @@ var Pawn = function () {
             this.x = value;
         }
     }, {
-        key: "Y",
+        key: 'Y',
         get: function get() {
             return this.y;
         },
@@ -339,7 +339,7 @@ var Pawn = function () {
             this.y = value;
         }
     }, {
-        key: "Color",
+        key: 'Color',
         get: function get() {
             return this.color;
         },
@@ -376,74 +376,11 @@ var Board = function () {
             this.pawns[0][i] = new Pawn(i, 1, 1 /*Pion.WHITE*/);
             this.pawns[1][i] = new Pawn(i, 6, 2 /*Pion.BLACK*/);
         }
-        this.active_player = 1;
         this.table = [[0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [2, 2, 2, 2, 2, 2, 2, 2], [0, 0, 0, 0, 0, 0, 0, 0]];
     }
 
     _createClass(Board, [{
-        key: "set_active_player",
-        value: function set_active_player(playerid) {
-            this.active_player = playerid;
-        }
-    }, {
-        key: "do_transition",
-        value: function do_transition(pawn_id, new_x, new_y) {
-            if (this.is_valid_transition(pawn_id, new_x, new_y)) {
-                console.log("Yah bby it's valid transiton");
-                var pawn = this.pawns[this.active_player - 1][pawn_id];
-                this.table[pawn.y][pawn.x] = 0;
-
-                this.pawns[this.active_player - 1][pawn_id].x = new_x;
-                this.pawns[this.active_player - 1][pawn_id].y = new_y;
-
-                if (this.table[new_y][new_x] != 0) {
-                    console.log("need to make null pawn of opponent");
-                    var opponent = 3 - this.active_player;
-                    for (var i = 0; i < 8; i++) {
-                        if (this.pawns[opponent - 1][i].x == new_x && this.pawns[opponent - 1][i].y == new_y) this.pawns[opponent - 1][i] = null;
-                    }
-                }
-                this.table[new_y][new_x] = this.active_player;
-            } else console.log("Sorry invalid transition");
-        }
-    }, {
-        key: "is_valid_transition",
-        value: function is_valid_transition(pawn_id, new_x, new_y) {
-
-            if (pawn_id < 0 && pawn_id > 7) return false; //uknonw pawn
-            var pawn = this.pawns[this.active_player - 1][pawn_id];
-            if (pawn == null) return false; //if pawn are null that means that pawn was eleminated
-            console.log(pawn.x + ' ' + pawn.y);
-            //move up(if active_player is 1)
-            //move down(if active player is 2)
-            var factor;
-            if (this.active_player == 1) factor = 1;
-            //default go up =>
-            //new_y - pawn.y > 0 => factor (new_y-pawn.y)>0
-
-            if (this.active_player == 2) factor = -1;
-            // default go down => new_y - pawn.y < 0
-            // factor(new_y - paw.y)>0
-
-            if (factor * (new_y - pawn.y) <= 0) return false; //can't go backward
-
-            // check if i can move forward
-            if (pawn.x == new_x) {
-
-                var move_length = Math.abs(pawn.y - new_y);
-                if (move_length > 2) return false; //can't go more than 2 moves
-                if (move_length == 1 && this.table[new_y][new_x] == 0) return true; //if forward cell is empty i can go
-                if (move_length == 2 && this.table[new_y + factor * 1][new_x] == 0 && this.table[new_y][new_x] == 0 && pawn.y == 4 - factor * 3) return true; //if forward 2 cells are empty and it's first move
-                else return false;
-            }
-            // chech if i can move by diagonal
-            if (Math.abs(new_x - pawn.x) == 1 && Math.abs(new_y - pawn.y) == 1) {
-                if (this.table[new_y][new_x] != 0 && this.table[new_y][new_x] != this.active_player) return true;
-            }
-            return false;
-        }
-    }, {
-        key: "is_final_state",
+        key: 'is_final_state',
         value: function is_final_state(playerid) {
             var target_line;
             console.log("verifying if player");
@@ -458,7 +395,7 @@ var Board = function () {
             return false;
         }
     }, {
-        key: "toString",
+        key: 'toString',
         value: function toString() {
             var string = '\n';
             for (var i = 7; i >= 0; i--) {
@@ -468,13 +405,130 @@ var Board = function () {
             string += '------------------\n |0,1,2,3,4,5,6,7';
             return string;
         }
+    }, {
+        key: 'Pawns',
+        get: function get() {
+            return this.pawns;
+        },
+        set: function set(value) {
+            this.pawns = value;
+        }
+    }, {
+        key: 'Table',
+        get: function get() {
+            return this.table;
+        },
+        set: function set(value) {
+            this.table = value;
+        }
     }]);
 
     return Board;
 }();
 
+var Game = function () {
+    function Game() {
+        _classCallCheck(this, Game);
+
+        this.active_player = 1;
+        this.board = new Board();
+    }
+
+    _createClass(Game, [{
+        key: 'set_active_player',
+
+
+        /**
+         * @param {Number} playerid
+         */
+        value: function set_active_player(playerid) {
+            this.active_player = playerid;
+        }
+    }, {
+        key: 'do_transition',
+        value: function do_transition(board, pawn_id, new_x, new_y) {
+            if (this.is_valid_transition(board, pawn_id, new_x, new_y)) {
+                //console.log("Yah bby it's valid transiton");
+                var pawn = board.Pawns[this.active_player - 1][pawn_id];
+                board.Table[pawn.y][pawn.x] = 0;
+
+                board.Pawns[this.active_player - 1][pawn_id].x = new_x;
+                board.Pawns[this.active_player - 1][pawn_id].y = new_y;
+
+                if (board.Table[new_y][new_x] != 0) {
+                    //console.log("need to make null pawn of opponent");
+                    var opponent = 3 - this.active_player;
+                    for (var i = 0; i < 8; i++) {
+                        if (board.Pawns[opponent - 1][i].x == new_x && board.Pawns[opponent - 1][i].y == new_y) board.Pawns[opponent - 1][i] = null;
+                    }
+                }
+                board.Table[new_y][new_x] = this.active_player;
+            } else console.log("Sorry invalid transition");
+        }
+    }, {
+        key: 'is_valid_transition',
+        value: function is_valid_transition(board, pawn_id, new_x, new_y) {
+
+            if (pawn_id < 0 && pawn_id > 7) return false; //uknonw pawn
+
+            var pawn = board.Pawns[this.active_player - 1][pawn_id];
+            if (pawn == null) return false; //if pawn are null that means that pawn was eleminated
+
+            console.log(pawn.X + ' ' + pawn.Y);
+
+            //move up(if active_player is 1)
+            //move down(if active player is 2)
+            var factor;
+            if (this.active_player == 1) factor = 1;
+            //default go up =>
+            //new_y - pawn.y > 0 => factor (new_y-pawn.y)>0
+
+            if (this.active_player == 2) factor = -1;
+            // default go down => new_y - pawn.y < 0
+            // factor(new_y - paw.y)>0
+
+            if (factor * (new_y - pawn.y) <= 0) return false; //can't go backward
+
+            // check if i can move forward
+            if (pawn.X == new_x) {
+                var move_length = Math.abs(pawn.Y - new_y);
+                if (move_length > 2) return false; //can't go more than 2 moves
+                if (move_length == 1 && board.Table[new_y][new_x] == 0) return true; //if forward cell is empty i can go
+                if (move_length == 2 && board.Table[new_y + factor * 1][new_x] == 0 && board.Table[new_y][new_x] == 0 && pawn.Y == 4 - factor * 3) return true; //if forward 2 cells are empty and it's first move
+                else return false;
+            }
+
+            // chech if i can move by diagonal
+            if (Math.abs(new_x - pawn.x) == 1 && Math.abs(new_y - pawn.y) == 1) {
+                if (board.Table[new_y][new_x] != 0 && board.Table[new_y][new_x] != this.active_player) return true;
+            }
+
+            return false;
+        }
+    }, {
+        key: 'ActivePlayer',
+        get: function get() {
+            return this.active_player;
+        },
+        set: function set(value) {
+            this.active_player = value;
+        }
+    }, {
+        key: 'Board',
+        get: function get() {
+            return this.table;
+        },
+        set: function set(value) {
+            this.table = value;
+        }
+    }]);
+
+    return Game;
+}();
+
 exports.Pawn = Pawn;
 exports.Board = Board;
+exports.Game = Game;
 
 },{}],4:[function(require,module,exports){
 /*!
