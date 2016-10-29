@@ -3,9 +3,19 @@
   <head>
     <meta charset="utf-8">
     <title>Simplest Chess</title>
-    <script type="text/javascript" src="/app.js"></script>
+    <link rel="stylesheet" type="text/css" src="chess.css">
   </head>
   <body>
+    <div id="content">
+      <canvas id="board" width="480" height="480">
+      </canvas>
+      <div id="infobox">
+        <p><span id="colorToPlay">White</span> to play</p>
+        <div id="coords">Hi</div>
+      </div>
+    </div>
 
+    <script type="text/javascript" src="chess.style.js"></script>
+    <script type="text/javascript" src="app.js"></script>
   </body>
 </html>
