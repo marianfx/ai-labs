@@ -1,8 +1,29 @@
 
-The result for random strategy, after running 10  inputs from inputs.txt are:
+The result for random strategy, after running 100  inputs from inputs.txt are:
         *Nr Fails: 0
-        *Nr Success: 10
-        *Average Moves: 43982
-        *Average Time: 2470
+        *Nr Success: 100
+        *Average Solution Length: 92
+        *Average Time: 0.0 mins, 0.0 seconds, 64.38 millis
+
+            
+The result for backtracking strategy, after running 100  inputs from inputs.txt are:
+        *Nr Fails: 0
+        *Nr Success: 100
+        *Average Solution Length: 54
+        *Average Time: 0.0 mins, 0.0 seconds, 36.75 millis
+
+            
+The result for hill climbing strategy, after running 100  inputs from inputs.txt are:
+        *Nr Fails: 25
+        *Nr Success: 75
+        *Average Solution Length: 8
+        *Average Time: 0.0 mins, 0.0 seconds, 190.66 millis
+
+            
+The result for astar strategy, after running 100  inputs from inputs.txt are:
+        *Nr Fails: 0
+        *Nr Success: 100
+        *Average Solution Length: 8
+        *Average Time: 0.0 mins, 0.0 seconds, 73.08 millis
 
             
