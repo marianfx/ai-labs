@@ -3,19 +3,30 @@
   <head>
     <meta charset="utf-8">
     <title>Simplest Chess</title>
-    <link rel="stylesheet" type="text/css" src="chess.css">
+    <!--STYLES-->
+    <!--Import Google Icon Font-->
+    <link type="text/css" rel="stylesheet" href="style/font.css">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="style/materialize.css" media="screen" />
+    <link rel="stylesheet" type="text/css" src="style/chess.css">
+    <link rel="stylesheet" type="text/css" href="style/sweetalert.css">
   </head>
   <body>
     <div id="content">
-      <canvas id="board" width="480" height="480">
-      </canvas>
-      <div id="infobox">
-        <p><span id="colorToPlay">White</span> to play</p>
-        <div id="coords">Hi</div>
+      <div style="display:inline;">
+        <canvas id="board" width="480" height="480">
+        </canvas>
+      </div>
+      <div class="row">
+        <div class="col s12 m6 l6" >
+          <ul id="moves" class="collection with-header">
+            <li class="collection-header"><h5>Moves history</h5></li>
+            <li class="collection-item">Player 1 moved that from there to that.</li>
+            <li class="collection-item">Player 2 moved that from there to that.</li>
+          </ul>
+        </div>
       </div>
     </div>
-
-    <script type="text/javascript" src="chess.style.js"></script>
     <script type="text/javascript" src="app.js"></script>
   </body>
 </html>

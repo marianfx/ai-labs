@@ -1,0 +1,12 @@
+{
+    "extends": "es2015",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+    "installedESLint": true,
+    "plugins": [
+        "standard",
+        "promise"
+    ]
+}

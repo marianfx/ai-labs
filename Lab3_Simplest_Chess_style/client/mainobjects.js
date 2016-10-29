@@ -1,14 +1,24 @@
+
 class Pawn {
     // WHITE = 1
     // BLACK = 2
     constructor(x, y, color) {
-        //
         this.x = x;
         this.y = y;
         this.color = color;
-
     }
+
+    get X(){ return this.x; }
+    set X(value){ this.x = value; }
+
+    get Y(){ return this.y; }
+    set Y(value){ this.y = value; }
+
+    get Color(){ return this.color; }
+    set Color(value){ this.color = value; }
 }
+
+
 class Board {
     /*
 Y
@@ -48,9 +58,11 @@ Y
             [0, 0, 0, 0, 0, 0, 0, 0]
         ];
     }
+
     set_active_player(playerid) {
         this.active_player = playerid;
     }
+
     do_transition(pawn_id, new_x, new_y) {
       if(this.is_valid_transition(pawn_id, new_x, new_y)){
         console.log("Yah bby it's valid transiton");
@@ -75,9 +87,7 @@ Y
         console.log("Sorry invalid transition");
 
     }
-    /**
-     * 
-     */
+    
     is_valid_transition(pawn_id, new_x, new_y) {
 
         if (pawn_id < 0 && pawn_id > 7)
@@ -125,6 +135,7 @@ Y
         }
         return false;
     }
+
     is_final_state(playerid) {
         var target_line
         console.log("verifying if player");
@@ -142,6 +153,7 @@ Y
         return false;
 
     }
+
     toString(){
       var string='\n';
       for(var i = 7; i>=0; i--){
@@ -151,6 +163,6 @@ Y
       string+='------------------\n |0,1,2,3,4,5,6,7'
       return string;
     }
-
-
 }
+
+export {Pawn, Board};

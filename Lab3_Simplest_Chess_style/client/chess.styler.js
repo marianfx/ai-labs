@@ -1,12 +1,10 @@
-var debug = {
-  outChar: false,
-  mouseCoords: false
-};
+
+var sweetAlert = require("sweetAlert");
 
 var defaults = {
   unitLength: 60, // Height / Width of a square
   fontSize: 40,
-  startingFen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+  startingFen: '8/pppppppp/8/8/8/8/PPPPPPPP/8',
   colors: {
     inactiveDark: 'rgb(192,192,255)',
     inactiveLight: 'rgb(255,255,255)',
@@ -15,71 +13,21 @@ var defaults = {
 };
 
 var activeSquare = null;
+var activePiece = null;
 
 var pieceCharMap = {
   white: {
-    king: "\u2654",
-    queen: "\u2655",
-    rook: "\u2656",
-    bishop: "\u2657",
-    knight: "\u2658",
     pawn: "\u2659"
   },
   black: {
-    king: "\u265a",
-    queen: "\u265b",
-    rook: "\u265c",
-    bishop: "\u265d",
-    knight: "\u265e",
     pawn: "\u265f"
   }
 };
 
 var pieceSymbolMap = {
-  'K': {
-    color: 'white',
-    name: 'king'
-  },
-  'Q': {
-    color: 'white',
-    name: 'queen'
-  },
-  'R': {
-    color: 'white',
-    name: 'rook'
-  },
-  'N': {
-    color: 'white',
-    name: 'knight'
-  },
-  'B': {
-    color: 'white',
-    name: 'bishop'
-  },
   'P': {
     color: 'white',
     name: 'pawn'
-  },
-
-  'k': {
-    color: 'black',
-    name: 'king'
-  },
-  'q': {
-    color: 'black',
-    name: 'queen'
-  },
-  'r': {
-    color: 'black',
-    name: 'rook'
-  },
-  'n': {
-    color: 'black',
-    name: 'knight'
-  },
-  'b': {
-    color: 'black',
-    name: 'bishop'
   },
   'p': {
     color: 'black',
@@ -89,30 +37,6 @@ var pieceSymbolMap = {
 
 var armies = {
   white: [{
-    type: 'K',
-    loc: [0, 4]
-  }, {
-    type: 'Q',
-    loc: [0, 3]
-  }, {
-    type: 'R',
-    loc: [0, 0]
-  }, {
-    type: 'R',
-    loc: [0, 7]
-  }, {
-    type: 'B',
-    loc: [0, 2]
-  }, {
-    type: 'B',
-    loc: [0, 5]
-  }, {
-    type: 'N',
-    loc: [0, 1]
-  }, {
-    type: 'N',
-    loc: [0, 6]
-  }, {
     type: 'P',
     loc: [1, 0]
   }, {
@@ -138,30 +62,6 @@ var armies = {
     loc: [1, 7]
   }],
   black: [{
-    type: 'k',
-    loc: [7, 4]
-  }, {
-    type: 'q',
-    loc: [7, 3]
-  }, {
-    type: 'r',
-    loc: [7, 0]
-  }, {
-    type: 'r',
-    loc: [7, 7]
-  }, {
-    type: 'b',
-    loc: [7, 2]
-  }, {
-    type: 'b',
-    loc: [7, 5]
-  }, {
-    type: 'n',
-    loc: [7, 1]
-  }, {
-    type: 'n',
-    loc: [7, 6]
-  }, {
     type: 'p',
     loc: [6, 0]
   }, {
@@ -202,8 +102,8 @@ function drawSquare(ctx, row, col, style) {
 }
 
 function drawSquares(ctx) {
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 8; j++) {
+  for (var i = 0; i < 8; i++) {
+    for (var j = 0; j < 8; j++) {
       drawSquare(ctx, i, j);
     }
   }
@@ -212,11 +112,14 @@ function drawSquares(ctx) {
 function drawPiece(ctx, char, row, col) {
   var x = defaults.unitLength * col + (defaults.unitLength - defaults.fontSize) / 2;
   var y = defaults.unitLength * row - (defaults.unitLength - defaults.fontSize) / 4;
-  var outChar = pieceCharMap[pieceSymbolMap[char].color][pieceSymbolMap[char].name];
-  if (!!debug.outChar) {
-    console.log("outChar: " + outChar + "  x: " + x + "  y: " + y)
-  }
+  var color = pieceSymbolMap[char].color;
+  var symb = pieceSymbolMap[char].name;
+  var outChar = pieceCharMap[color][symb];
   ctx.strokeText(outChar, x, y);
+}
+
+function undrawPiece(ctx, row, col) {
+  drawSquare(ctx, row, col);
 }
 
 function drawPiecesFen(ctx, fen) {
@@ -280,51 +183,77 @@ function cbSelectPiece(evt) {
   var row = Math.floor((evt.y - 8) / defaults.unitLength);
   var col = Math.floor((evt.x - 8) / defaults.unitLength);
 
-  if (!!debug.mouseCoords) {
-    console.log([row, col]);
-  }
-
   // Check if there is already an active square - if so, deselect it
-  if (!!activeSquare) {
-    var activeRow = activeSquare[0],
-      activeCol = activeSquare[1];
-    // Find out old piece first
-    var oldPiece = getPiece(activeRow, activeCol);
-    drawSquare(ctx, activeRow, activeCol); // Default
-    drawPiece(ctx, oldPiece.type, activeRow, activeCol);
-    activeSquare = null;
+  // if (!!activeSquare) {
+  //   var activeRow = activeSquare[0],
+  //     activeCol = activeSquare[1];
+  //   // Find out old piece first
+  //   var oldPiece = getPiece(activeRow, activeCol);
+  //   drawSquare(ctx, activeRow, activeCol); // Default
+  //   drawPiece(ctx, oldPiece.type, activeRow, activeCol);
+  //   activeSquare = null;
 
-    // If this is the active square, nothing further is required
-    if (activeRow === row && activeCol === col) {
-      return;
-    }
-  }
+  //   // If this is the active square, nothing further is required
+  //   if (activeRow === row && activeCol === col) {
+  //     return;
+  //   }
+  // }
 
   // Find out what piece (if any) is on the square so it can be redrawn
-  var piece = getPiece(row, col);
+  activePiece = getPiece(row, col);
 
   // If there is no piece here, return
-  if (!piece) {
+  if (!activePiece) {
     return;
   }
 
-  activeSquare = [row, col];
-  drawSquare(ctx, row, col, 'active');
-  drawPiece(ctx, piece.type, row, col);
+  if(activePiece.type != 'p'){
+    sweetAlert("Oops...", "You can move your pieces only!", "error");
+  }
+
+  // activeSquare = [row, col];
+  // drawSquare(ctx, row, col, 'active');
+  // drawPiece(ctx, activePiece.type, row, col);
 
 }
 
-function cbReleasePiece(evt) {}
+function cbReleasePiece(evt) {
+  //check if valid
+  //if valid, drop piece there
+  var canvas = evt.target;
+  var ctx = canvas.getContext('2d');
 
-function cbDisplayCoords(evt) {
-  var x = evt.clientX;
-  var y = evt.clientY;
+  var row = Math.floor((evt.y - 8) / defaults.unitLength);
+  var col = Math.floor((evt.x - 8) / defaults.unitLength);
 
-  document.getElementById('coords').innerHTML = '(' + x + ', ' + y + ')';
+  // If there is no piece here, return
+  if (!activePiece) {
+    return;
+  }
 
+  if(activePiece.type != 'p'){
+    sweetAlert("Oops...", "You can move your pieces only!", "error");
+  }
+
+  movePieceVisually(ctx, 'p', activePiece.loc[0], activePiece.loc[1], row, col);
 }
 
-window.onload = function() {
+function movePieceVisually(ctx, char, srow, scol, erow, ecol){
+  undrawPiece(ctx, srow, scol);
+  drawPiece(ctx, char, erow, ecol);
+  var color = 'black'
+  if(char == 'P')
+    color = 'white'
+
+  for(var i = 0; i < 8; i++){
+	  if(armies[color][i].loc[0] == srow && armies[color][i].loc[1] == scol){
+        armies[color][i].loc[0] = erow;
+        armies[color][i].loc[1] = ecol;
+	  }
+  }
+}
+
+function prepareChessBoard() {
   var canvas = document.getElementById('board');
   var ctx = canvas.getContext('2d');
 
@@ -338,11 +267,9 @@ window.onload = function() {
   // Draw pieces
   drawArmies(ctx);
 
-  drawPiece(ctx, 'P', 3, 3)
-
   // Add event handlers
   canvas.addEventListener('mousedown', cbSelectPiece);
   canvas.addEventListener('mouseup', cbReleasePiece);
-
-  canvas.addEventListener('mousemove', cbDisplayCoords);
 };
+
+export { prepareChessBoard, movePieceVisually };
