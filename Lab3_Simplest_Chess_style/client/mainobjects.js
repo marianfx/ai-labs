@@ -1,5 +1,6 @@
 
 import * as _ from 'lodash'
+import {Styler} from './chess.styler.js'
 
 class Pawn {
     // WHITE = 1 = computer
@@ -85,9 +86,15 @@ class Board {
 
 class Game{
 
+    /**
+     * @static {Styler}
+     */
     constructor(){
-        this.active_player = 1
-        this.board = new Board()
+        this.board = new Board();
+        this.styler = new Styler();
+        this.styler.prepareChessBoard();
+        this.active_player = 2;
+        this.styler.currentPlayer = 2;        
     }
 
     get ActivePlayer(){ return this.active_player; }
@@ -104,6 +111,7 @@ class Game{
      */
     set_active_player(playerid) {
         this.active_player = playerid;
+        this.styler.currentPlayer = playerid;
     }
 
     /**
