@@ -457,30 +457,39 @@ var Game = function () {
         value: function set_active_player(playerid) {
             this.active_player = playerid;
         }
+
+        /**
+         * @returns {Board} A new Board (deep copied) with the given transition executed.
+         */
+
     }, {
         key: 'do_transition',
         value: function do_transition(board, pawn_id, new_x, new_y) {
+
             if (!this.is_valid_transition(board, pawn_id, new_x, new_y)) {
                 console.log("Invalid transition.");
                 return;
             }
             //console.log("Yah bby it's valid transiton");
+            var output = _.cloneDeep(board); //create a copy of the board
+
             var pid = this.active_player - 1;
-            var pawn = board.Pawns[pid][pawn_id];
-            board.Table[pawn.y][pawn.x] = 0;
+            var pawn = output.Pawns[pid][pawn_id];
 
-            board.Pawns[pid][pawn_id].x = new_x;
-            board.Pawns[pid][pawn_id].y = new_y;
+            output.Pawns[pid][pawn_id].x = new_x;
+            output.Pawns[pid][pawn_id].y = new_y;
 
-            if (board.Table[new_y][new_x] != 0) {
+            if (output.Table[new_y][new_x] != 0) {
                 //console.log("need to make null pawn of opponent");
                 var opponent = 3 - this.active_player - 1;
-                var opPawn = board.Pawns[opponent][i];
-                board.Pawns[opponent] = _.remove(board.Pawns[opponent], function (pawn) {
+                output.Pawns[opponent] = _.remove(output.Pawns[opponent], function (pawn) {
                     return pawn.X == new_x && pawn.Y == new_y;
                 });
             }
-            board.Table[new_y][new_x] = this.active_player;
+            output.Table[pawn.y][pawn.x] = 0;
+            output.Table[new_y][new_x] = this.active_player;
+
+            return output;
         }
     }, {
         key: 'is_valid_transition',
@@ -530,6 +539,17 @@ var Game = function () {
             }
             return false;
         }
+
+        /**
+         * Given a board, computes all the board states available for that board, given the current player as playerid.
+         * @param {Board} board
+         * @param {Number} playerid
+         * @returns {Board[]} An array of Board, as all the available states.
+         */
+
+    }, {
+        key: 'getAllAvailableBoards',
+        value: function getAllAvailableBoards(board, playerid) {}
     }, {
         key: 'ActivePlayer',
         get: function get() {
