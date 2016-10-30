@@ -111,15 +111,15 @@ class Game{
      */
     do_transition(board, pawn_id, playerid, new_x, new_y) {
 
-        if(this.is_valid_transition(board, pawn_id, playerid, new_x, new_y) == false){
-            console.log("Invalid transition.")
-            return null;
-        }
-        //console.log("Yah bby it's valid transiton");
         var output = _.cloneDeep(board); //create a copy of the board
-
         var pid = playerid - 1;
         var pawn = output.Pawns[pid][pawn_id];
+        console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+
+        if(this.is_valid_transition(board, pawn_id, playerid, new_x, new_y) == false){
+            console.log("Tried to do invalid transition.");
+            return null;
+        }
         output.Table[pawn.y][pawn.x] = 0;
 
         (output.Pawns[pid][pawn_id]).x = new_x;
@@ -148,8 +148,6 @@ class Game{
         var pawn = board.Pawns[playerid - 1][pawn_id];
         if (pawn == null)
           return false //if pawn is null that means that pawn was eleminated
-        
-        console.log(pawn.X + ' ' + pawn.Y);
 
         //move up(if active_player is 1)
         //move down(if active player is 2)
@@ -252,10 +250,11 @@ class Game{
         if (playerid == 1)
             pawns = board.WhitePawns;
         var output = [];
-
-        _.forEach(pawns, function(pawn, index){
-            _.extend(output, this.getAllBoardsForPawn(board, pown, index, playerid));
-        });
+        var me = this;
+        for(var index = 0; index < pawns.length; index ++){
+            var pawn = pawns[index];
+            output = _.concat(output, me.getAllBoardsForPawn(board, pawn, index, playerid));
+        };
 
         return output;
     }

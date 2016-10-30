@@ -231,6 +231,10 @@ function cbReleasePiece(evt) {
     return;
   }
 
+  if(currentPlayer != 2){
+    sweetAlert("Oops...", "It is not your turn!", "error");
+  }
+
   if(activePiece.type != 'p'){
     sweetAlert("Oops...", "You can move your pieces only!", "error");
   }
@@ -253,6 +257,9 @@ function movePieceVisually(ctx, char, srow, scol, erow, ecol){
   }
 }
 
+
+var currentPlayer = 2;//the main player
+
 function prepareChessBoard() {
   var canvas = document.getElementById('board');
   var ctx = canvas.getContext('2d');
@@ -272,4 +279,4 @@ function prepareChessBoard() {
   canvas.addEventListener('mouseup', cbReleasePiece);
 };
 
-export { prepareChessBoard, movePieceVisually };
+export { prepareChessBoard, movePieceVisually, currentPlayer };

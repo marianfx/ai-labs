@@ -17,10 +17,12 @@ var _mainobjects = require('./mainobjects.js');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
+var theGame = new _mainobjects.Game();
+
 styler.prepareChessBoard();
 
-var x = new _mainobjects.Game();
-x.getAllBoardsForPawn(x.board, x.board.BlackPawns[0], 0, 2);
+theGame.getAllBoardsForPawn(theGame.board, theGame.board.BlackPawns[0], 0, 2);
+theGame.getAllAvailableBoards(theGame.board, 2);
 
 },{"./chess.styler.js":2,"./mainobjects.js":3,"jquery":4,"sweetalert":23}],2:[function(require,module,exports){
 'use strict';
@@ -260,6 +262,10 @@ function cbReleasePiece(evt) {
     return;
   }
 
+  if (currentPlayer != 2) {
+    sweetAlert("Oops...", "It is not your turn!", "error");
+  }
+
   if (activePiece.type != 'p') {
     sweetAlert("Oops...", "You can move your pieces only!", "error");
   }
@@ -280,6 +286,8 @@ function movePieceVisually(ctx, char, srow, scol, erow, ecol) {
     }
   }
 }
+
+var currentPlayer = 2; //the main player
 
 function prepareChessBoard() {
   var canvas = document.getElementById('board');
@@ -302,6 +310,7 @@ function prepareChessBoard() {
 
 exports.prepareChessBoard = prepareChessBoard;
 exports.movePieceVisually = movePieceVisually;
+exports.currentPlayer = currentPlayer;
 
 },{"sweetAlert":14}],3:[function(require,module,exports){
 'use strict';
@@ -467,15 +476,15 @@ var Game = function () {
         key: 'do_transition',
         value: function do_transition(board, pawn_id, playerid, new_x, new_y) {
 
-            if (this.is_valid_transition(board, pawn_id, playerid, new_x, new_y) == false) {
-                console.log("Invalid transition.");
-                return null;
-            }
-            //console.log("Yah bby it's valid transiton");
             var output = _.cloneDeep(board); //create a copy of the board
-
             var pid = playerid - 1;
             var pawn = output.Pawns[pid][pawn_id];
+            console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+
+            if (this.is_valid_transition(board, pawn_id, playerid, new_x, new_y) == false) {
+                console.log("Tried to do invalid transition.");
+                return null;
+            }
             output.Table[pawn.y][pawn.x] = 0;
 
             output.Pawns[pid][pawn_id].x = new_x;
@@ -501,8 +510,6 @@ var Game = function () {
 
             var pawn = board.Pawns[playerid - 1][pawn_id];
             if (pawn == null) return false; //if pawn is null that means that pawn was eleminated
-
-            console.log(pawn.X + ' ' + pawn.Y);
 
             //move up(if active_player is 1)
             //move down(if active player is 2)
@@ -591,10 +598,11 @@ var Game = function () {
             var pawns = board.BlackPawns;
             if (playerid == 1) pawns = board.WhitePawns;
             var output = [];
-
-            _.forEach(pawns, function (pawn, index) {
-                _.extend(output, this.getAllBoardsForPawn(board, pown, index, playerid));
-            });
+            var me = this;
+            for (var index = 0; index < pawns.length; index++) {
+                var pawn = pawns[index];
+                output = _.concat(output, me.getAllBoardsForPawn(board, pawn, index, playerid));
+            };
 
             return output;
         }
