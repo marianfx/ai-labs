@@ -211,9 +211,9 @@ function cbSelectPiece(evt) {
     sweetAlert("Oops...", "You can move your pieces only!", "error");
   }
 
-  // activeSquare = [row, col];
-  // drawSquare(ctx, row, col, 'active');
-  // drawPiece(ctx, activePiece.type, row, col);
+  activeSquare = [row, col];
+  drawSquare(ctx, row, col, 'active');
+  drawPiece(ctx, activePiece.type, row, col);
 
 }
 
