@@ -6,3 +6,4 @@ import {Pawn, Board, Game} from './mainobjects.js'
 styler.prepareChessBoard();
 
 var x = new Game();
+x.getAllBoardsForPawn(x.board, x.board.BlackPawns[0], 0, 2);

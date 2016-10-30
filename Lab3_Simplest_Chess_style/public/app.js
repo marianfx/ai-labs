@@ -20,6 +20,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 styler.prepareChessBoard();
 
 var x = new _mainobjects.Game();
+x.getAllBoardsForPawn(x.board, x.board.BlackPawns[0], 0, 2);
 
 },{"./chess.styler.js":2,"./mainobjects.js":3,"jquery":4,"sweetalert":23}],2:[function(require,module,exports){
 'use strict';
@@ -464,40 +465,41 @@ var Game = function () {
 
     }, {
         key: 'do_transition',
-        value: function do_transition(board, pawn_id, new_x, new_y) {
+        value: function do_transition(board, pawn_id, playerid, new_x, new_y) {
 
-            if (!this.is_valid_transition(board, pawn_id, new_x, new_y)) {
+            if (this.is_valid_transition(board, pawn_id, playerid, new_x, new_y) == false) {
                 console.log("Invalid transition.");
-                return;
+                return null;
             }
             //console.log("Yah bby it's valid transiton");
             var output = _.cloneDeep(board); //create a copy of the board
 
-            var pid = this.active_player - 1;
+            var pid = playerid - 1;
             var pawn = output.Pawns[pid][pawn_id];
+            output.Table[pawn.y][pawn.x] = 0;
 
             output.Pawns[pid][pawn_id].x = new_x;
             output.Pawns[pid][pawn_id].y = new_y;
 
             if (output.Table[new_y][new_x] != 0) {
-                //console.log("need to make null pawn of opponent");
-                var opponent = 3 - this.active_player - 1;
+                var opponent = 3 - playerid - 1;
                 output.Pawns[opponent] = _.remove(output.Pawns[opponent], function (pawn) {
                     return pawn.X == new_x && pawn.Y == new_y;
                 });
             }
-            output.Table[pawn.y][pawn.x] = 0;
-            output.Table[new_y][new_x] = this.active_player;
+            output.Table[new_y][new_x] = playerid;
 
             return output;
         }
     }, {
         key: 'is_valid_transition',
-        value: function is_valid_transition(board, pawn_id, new_x, new_y) {
+        value: function is_valid_transition(board, pawn_id, playerid, new_x, new_y) {
 
-            if (pawn_id < 0 && pawn_id > 7) return false; //uknonw pawn
+            if (pawn_id < 0 || pawn_id > 7) return false; //uknonw pawn
 
-            var pawn = board.Pawns[this.active_player - 1][pawn_id];
+            if (new_x < 0 || new_x > 7 || new_y < 0 || new_y > 7) return false;
+
+            var pawn = board.Pawns[playerid - 1][pawn_id];
             if (pawn == null) return false; //if pawn is null that means that pawn was eleminated
 
             console.log(pawn.X + ' ' + pawn.Y);
@@ -505,7 +507,7 @@ var Game = function () {
             //move up(if active_player is 1)
             //move down(if active player is 2)
             var factor = -1;
-            if (this.active_player == 1) factor = 1;
+            if (playerid == 1) factor = 1;
 
             if (factor * (new_y - pawn.Y) <= 0) return false; //can't go backward
 
@@ -514,12 +516,17 @@ var Game = function () {
                 var move_length = Math.abs(pawn.Y - new_y);
                 if (move_length > 2) return false;
                 if (move_length == 1 && board.Table[new_y][new_x] == 0) return true;
-                if (move_length == 2 && board.Table[new_y + factor * 1][new_x] == 0 && board.Table[new_y][new_x] == 0 && pawn.Y == 4 - factor * 3) return true;else return false;
+                if (move_length == 2) {
+                    if (board.Table[new_y + factor * 1][new_x] == 0 && board.Table[new_y][new_x] == 0) {
+                        if (factor == -1) return pawn.Y == 6;
+                        return pawn.Y == 1;
+                    }
+                } else return false;
             }
 
             // chech if i can move by diagonal
             if (Math.abs(new_x - pawn.x) == 1 && Math.abs(new_y - pawn.y) == 1) {
-                if (board.Table[new_y][new_x] != 0 && board.Table[new_y][new_x] != this.active_player) return true;
+                if (board.Table[new_y][new_x] != 0 && board.Table[new_y][new_x] != playerid) return true;
             }
 
             return false;
@@ -539,6 +546,37 @@ var Game = function () {
             }
             return false;
         }
+    }, {
+        key: 'getAllBoardsForPawn',
+        value: function getAllBoardsForPawn(board, pown, pid, playerid) {
+            var factor = 1; //going down
+            if (playerid == 2) factor = -1; //going up
+            var output = [];
+
+            // one position - forward
+            var newY = pown.Y + factor * 1;
+            var upBoard = this.do_transition(board, pid, playerid, pown.X, newY);
+            if (upBoard != null) output.push(upBoard);
+
+            // two positions - forward
+            newY = pown.Y + factor * 2;
+            var upUpBoard = this.do_transition(board, pid, playerid, pown.X, newY);
+            if (upUpBoard != null) output.push(upUpBoard);
+
+            // right corner (+1, +1)
+            var newX = pown.X + factor * 1;
+            newY = pown.Y + factor * 1;
+            var rightCorner = this.do_transition(board, pid, playerid, newX, newY);
+            if (rightCorner != null) output.push(rightCorner);
+
+            // left corner
+            newX = pown.X - factor * 1;
+            newY = pown.Y + factor * 1;
+            var leftCorner = this.do_transition(board, pid, playerid, newX, newY);
+            if (leftCorner != null) output.push(leftCorner);
+
+            return output;
+        }
 
         /**
          * Given a board, computes all the board states available for that board, given the current player as playerid.
@@ -549,7 +587,17 @@ var Game = function () {
 
     }, {
         key: 'getAllAvailableBoards',
-        value: function getAllAvailableBoards(board, playerid) {}
+        value: function getAllAvailableBoards(board, playerid) {
+            var pawns = board.BlackPawns;
+            if (playerid == 1) pawns = board.WhitePawns;
+            var output = [];
+
+            _.forEach(pawns, function (pawn, index) {
+                _.extend(output, this.getAllBoardsForPawn(board, pown, index, playerid));
+            });
+
+            return output;
+        }
     }, {
         key: 'ActivePlayer',
         get: function get() {
@@ -558,6 +606,11 @@ var Game = function () {
         set: function set(value) {
             this.active_player = value;
         }
+
+        /**
+         * @link {Board}
+         */
+
     }, {
         key: 'Board',
         get: function get() {
