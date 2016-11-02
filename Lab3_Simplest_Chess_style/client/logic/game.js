@@ -1,126 +1,11 @@
 import * as _ from 'lodash'
-import {
-    Styler
-} from './chess.styler.js'
 
-class Pawn {
-    // WHITE = 1 = computer
-    // BLACK = 2 = human
-    constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.prev_x = x;
-        this.prev_y = y;
-        this.color = color;
-    }
-
-    get X() {
-        return this.x;
-    }
-    set X(value) {
-        this.x = value;
-    }
-
-    get Y() {
-        return this.y;
-    }
-    set Y(value) {
-        this.y = value;
-    }
-
-    get Color() {
-        return this.color;
-    }
-    set Color(value) {
-        this.color = value;
-    }
-}
-
-
-class Board {
-    /*
-     \ X  0 1 2 3 4 5 6 7
-    Y  ----------------
-    0 | 0 0 0 0 0 0 0 0
-    1 | 1 1 1 1 1 1 1 1
-    2 | 0 0 0 0 0 0 0 0
-    3 | 0 0 0 0 0 0 0 0
-    4 | 0 0 0 0 0 0 0 0
-    5 | 0 0 0 0 0 0 0 0
-    6 | 2 2 2 2 2 2 2 2
-    7 | 0 0 0 0 0 0 0 0
-        pionii 1 ca sa castige trebuie sa ajunga pe liia 7
-        pionii 2 ca sa castige trebuie sa ajunga pe linia 0
-        white move  first
-    */
-    constructor() {
-        this.pawns = [
-            [],
-            []
-        ];
-        for (var i = 0; i < 8; i++) {
-            this.pawns[0][i] = new Pawn(i, 1, 1 /*WHITE*/ );
-            this.pawns[1][i] = new Pawn(i, 6, 2 /*BLACK*/ );
-
-        }
-        this.table = [
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [2, 2, 2, 2, 2, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0]
-        ];
-        this.previous_table = this.table;
-    }
-
-    get Pawns() {
-        return this.pawns;
-    }
-    set Pawns(value) {
-        this.pawns = value;
-    }
-
-    get Table() {
-        return this.table;
-    }
-    set Table(value) {
-        this.table = value;
-    }
-
-    get BlackPawns() {
-        return this.pawns[1];
-    }
-    get WhitePawns() {
-        return this.pawns[0];
-    }
-
-    get BlackPawnsCount() {
-        return _.size(this.BlackPawns);
-    }
-    get WhitePawnsCount() {
-        return _.size(this.WhitePawns);
-    }
-
-    toString() {
-        var string = '\n';
-        for (var i = 7; i >= 0; i--) {
-            string += i + '|' + this.table[i]
-            string += '\n'
-        }
-        string += '------------------\n |0,1,2,3,4,5,6,7'
-        return string;
-    }
-}
-
+import {Board} from '../models/board'
+import {Pawn} from '../models/pawn'
+import {Styler} from '../interface/styler'
 
 class Game {
 
-    /**
-     * @static {Styler}
-     */
     constructor() {
         this.board = new Board();
         this.styler = new Styler();
@@ -136,9 +21,6 @@ class Game {
         this.active_player = value;
     }
 
-    /**
-     * @link {Board}
-     */
     get Board() {
         return this.table;
     }
@@ -168,7 +50,6 @@ class Game {
             console.log("Tried to do invalid transition.");
             return null;
         }
-        output.previous_table = _cloneDeep(output.Table);
         output.Table[pawn.y][pawn.x] = 0;
 
         (output.Pawns[pid][pawn_id]).prev_x = pawn.x;
@@ -374,8 +255,4 @@ class Game {
     }
 }
 
-export {
-    Pawn,
-    Board,
-    Game
-};
+export {Game};

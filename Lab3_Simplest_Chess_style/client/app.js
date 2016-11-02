@@ -1,6 +1,6 @@
-import * as $ from 'jquery'
-import * as swal from 'sweetalert'
-import {Pawn, Board, Game} from './mainobjects.js'
+import {Pawn} from './models/pawn'
+import {Board} from './models/board'
+import {Game} from './logic/game'
 
 var theGame = new Game();
 
