@@ -16,14 +16,21 @@ class RandomPlayer extends Player{
      * Selects pieces randomly
      * @param {Function} callback
      */
-    strategy(callback){
-        var possibleMoves = this.game.getAllAvailableMovesForPlayer(this.game.board, this.id);
+    strategy(game, callback){
+        var possibleMoves = game.getAllAvailableMovesForPlayer(game.board, this.id);
+
+        // check if no available moves
+        if(_.size(possibleMoves) == 0 )
+            return callback(game, true);
+
         var n = _.size(possibleMoves);
-        var randNr = Math.random() * n;
+        var randNr = Math.floor(Math.random() * n);
         var move = possibleMoves[randNr];
 
-        this.executeMove(move);
-        callback();
+        this.executeMove(game, move);
+        setTimeout(function(){
+            callback(game);
+        }, 2000);
     }
 }
 

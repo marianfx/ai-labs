@@ -8,6 +8,7 @@ var _board = require('./models/board');
 var _game = require('./logic/game');
 
 var theGame = new _game.Game();
+theGame.runGame(1);
 
 },{"./logic/game":3,"./models/board":6,"./models/pawn":8}],2:[function(require,module,exports){
 'use strict';
@@ -111,6 +112,11 @@ var Styler = function () {
   }
 
   _createClass(Styler, [{
+    key: 'displayMessage',
+    value: function displayMessage(message) {
+      this.sweetAlert(message);
+    }
+  }, {
     key: 'drawSquare',
     value: function drawSquare(ctx, row, col, style) {
       var len = this.defaults.unitLength;
@@ -274,6 +280,7 @@ var Styler = function () {
       var ctx = canvas.getContext('2d');
 
       this.undrawPiece(ctx, srow, scol);
+      this.undrawPiece(ctx, erow, ecol);
       this.drawPiece(ctx, char, erow, ecol);
       var color = 'black';
       if (char == 'P') color = 'white';
@@ -363,17 +370,27 @@ var Game = function () {
 
     _createClass(Game, [{
         key: 'runGame',
-        value: function runGame() {
-            while (true) {
-                if (this.is_final_state(this.board, this.active_player)) {
-                    //do some stuff for finish
+        value: function runGame(run) {
+
+            this.players[this.active_player].strategy(this, function (game, playerHasNoMoreMoves) {
+
+                if (playerHasNoMoreMoves) {
+
+                    var msg = "Game finished in " + run + " moves. Winner: Player #" + game.active_player % 2 + 1 + " (player " + game.active_player + " was left out of moves.";
+                    game.styler.displayMessage(msg);
+                    return;
                 }
 
-                me = this;
-                this.players[this.active_player].strategy(function () {
-                    me.set_active_player(me.active_player % 2 + 1);
-                });
-            }
+                if (game.is_final_state(game.board, game.active_player)) {
+                    var msg = "Game finished in " + run + " moves. Winner: Player #" + game.active_player;
+                    game.styler.displayMessage(msg);
+                    return;
+                }
+
+                // next
+                game.set_active_player(game.active_player % 2 + 1);
+                game.runGame(run + 1);
+            });
         }
 
         /**
@@ -407,9 +424,9 @@ var Game = function () {
         key: 'do_transition',
         value: function do_transition(board, pawn_id, playerid, new_x, new_y) {
 
-            var output = _.cloneDeep(board); //create a copy of the board
+            var output = _.cloneDeep(board);
             var pid = playerid - 1;
-            var pawn = output.Pawns[pid][pawn_id];
+            var pawn = output.pawns[pid][pawn_id];
             console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
 
             var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
@@ -419,20 +436,26 @@ var Game = function () {
             }
             output.Table[pawn.y][pawn.x] = 0;
 
-            output.Pawns[pid][pawn_id].prev_x = pawn.x;
-            output.Pawns[pid][pawn_id].prev_x = pawn.y;
-            output.Pawns[pid][pawn_id].x = new_x;
-            output.Pawns[pid][pawn_id].y = new_y;
-
-            if (check.type_move == 'attack') {
+            output.pawns[pid][pawn_id].prev_x = pawn.x;
+            output.pawns[pid][pawn_id].prev_x = pawn.y;
+            output.pawns[pid][pawn_id].x = new_x;
+            output.pawns[pid][pawn_id].y = new_y;
+            output.pawns[pid][pawn_id].was_moved_prev = true;
+            for (var i = 0; i < output.pawns[pid].length; i++) {
+                if (i != pawn_id) output.pawns[pid][i].was_moved_prev = false;
+            }if (check.type_move == 'attack') {
                 var opponent = 3 - playerid - 1;
-                output.Pawns[opponent] = _.remove(output.Pawns[opponent], function (pawn) {
-                    return pawn.X == new_x && pawn.Y == new_y;
-                });
+                for (var i = 0; i < 8; i++) {
+                    if (output.pawns[opponent][i].x == new_x && output.pawns[opponent][i].y == new_y) {
+                        output.pawns[opponent][i].IsOut = true;
+                        break;
+                    }
+                }
             }
+
             if (check.type_move == 'enpassan') {
                 var opponent = 3 - playerid - 1;
-                output.Pawns[opponent][check.ate_pawn] = null;
+                output.pawns[opponent][check.ate_pawn].IsOut = true;
             }
             output.Table[new_y][new_x] = playerid;
 
@@ -481,17 +504,25 @@ var Game = function () {
                     'type_move': 'forward'
                 };
                 if (move_length == 2) {
-                    if (board.Table[new_y + factor * 1][new_x] == 0 && board.Table[new_y][new_x] == 0) {
-                        if (factor == -1) return {
-                            'is_valid': pawn.Y == 6,
-                            'type_move': 'forward'
-                        };
+                    try {
+                        if (board.Table[new_y + factor * -1][new_x] == 0 && board.Table[new_y][new_x] == 0) {
+                            if (factor == -1) return {
+                                'is_valid': pawn.Y == 6,
+                                'type_move': 'forward'
+                            };
+                            return {
+                                'is_valid': pawn.Y == 1,
+                                'type_move': 'forward'
+                            };
+                        }
+                    } catch (error) {
                         return {
-                            'is_valid': pawn.Y == 1,
-                            'type_move': 'forward'
+                            'is_valid': false,
+                            'type_move': null
                         };
                     }
-                } else return {
+                }
+                return {
                     'is_valid': false,
                     'type_move': null
                 };
@@ -513,7 +544,7 @@ var Game = function () {
                 var line = pawn.y;
                 op_pawn_id = _.findIndex(board.Pawns[opponent], function (pawn) {
                     if (pawn == null) return false;
-                    if (pawn.y == line && pawn.x == new_x) return pawn.x == pawn.prev_x && Math.abs(pawn.y - pawn.prev_y) == 2;
+                    if (pawn.y == line && pawn.x == new_x) return pawn.x == pawn.prev_x && Math.abs(pawn.y - pawn.prev_y) == 2 && pawn.last_moved;
                 });
                 if (op_pawn_id > -1) return {
                     'is_valid': true,
@@ -540,6 +571,7 @@ var Game = function () {
             var player_pawns = board.pawns[playerid - 1];
             for (var i = 0; i < 8; i++) {
                 var pawn = player_pawns[i];
+                if (pawn.IsOut) continue;
                 if (pawn.y == target_line) return true;
             }
             return false;
@@ -599,6 +631,7 @@ var Game = function () {
             var me = this;
             for (var index = 0; index < pawns.length; index++) {
                 var pawn = pawns[index];
+                if (pawn.IsOut) continue;
                 output = _.concat(output, me.getAllMovesForPawn(board, pawn, index, playerid));
             };
 
@@ -654,7 +687,6 @@ var Player = function () {
 
         if (this.strategy === undefined) throw new TypeError("Method strategy must be overriden.");
 
-        this.game = theGame;
         this.id = theId;
     }
 
@@ -665,12 +697,12 @@ var Player = function () {
 
     _createClass(Player, [{
         key: "executeMove",
-        value: function executeMove(move) {
+        value: function executeMove(game, move) {
 
-            this.game.Board = this.game.get_board_from_move(this.game.board, move);
+            game.board = game.get_board_from_move(game.board, move);
             var chr = 'p';
-            if (this.game.active_player == 1) chr = 'P';
-            this.game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
+            if (game.active_player == 1) chr = 'P';
+            game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
         }
     }]);
 
@@ -726,14 +758,20 @@ var RandomPlayer = function (_Player) {
 
     _createClass(RandomPlayer, [{
         key: 'strategy',
-        value: function strategy(callback) {
-            var possibleMoves = this.game.getAllAvailableMovesForPlayer(this.game.board, this.id);
+        value: function strategy(game, callback) {
+            var possibleMoves = game.getAllAvailableMovesForPlayer(game.board, this.id);
+
+            // check if no available moves
+            if (_.size(possibleMoves) == 0) return callback(game, true);
+
             var n = _.size(possibleMoves);
-            var randNr = Math.random() * n;
+            var randNr = Math.floor(Math.random() * n);
             var move = possibleMoves[randNr];
 
-            this.executeMove(move);
-            callback();
+            this.executeMove(game, move);
+            setTimeout(function () {
+                callback(game);
+            }, 2000);
         }
     }]);
 
@@ -894,7 +932,9 @@ var Pawn = function () {
         this.y = y;
         this.prev_x = x;
         this.prev_y = y;
+        this.was_moved_prev = false;
         this.color = color;
+        this.IsOut = false;
     }
 
     _createClass(Pawn, [{

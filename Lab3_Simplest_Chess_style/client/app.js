@@ -3,3 +3,4 @@ import {Board} from './models/board'
 import {Game} from './logic/game'
 
 var theGame = new Game();
+theGame.runGame(1);

@@ -13,8 +13,7 @@ class Player{
             
         if(this.strategy === undefined)
             throw new TypeError("Method strategy must be overriden.");
-        
-        this.game = theGame;
+
         this.id = theId;
     }
 
@@ -22,13 +21,13 @@ class Player{
     /**
      * @param {Move} move
      */
-    executeMove(move){
+    executeMove(game, move){
         
-        this.game.Board = this.game.get_board_from_move(this.game.board, move);
+        game.board = game.get_board_from_move(game.board, move);
         var chr = 'p';
-        if (this.game.active_player == 1)
+        if (game.active_player == 1)
             chr = 'P'
-        this.game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
+        game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
     }
 }
 

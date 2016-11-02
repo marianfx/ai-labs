@@ -8,6 +8,7 @@ class Pawn {
         this.prev_y = y;
         this.was_moved_prev = false;
         this.color = color;
+        this.IsOut = false;
     }
 
     get X() {

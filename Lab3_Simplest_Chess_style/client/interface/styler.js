@@ -88,6 +88,10 @@ class Styler{
       this.sweetAlert = require("sweetAlert");
     }
     
+    displayMessage(message){
+      this.sweetAlert(message)
+    }
+
     drawSquare(ctx, row, col, style) {
       var len = this.defaults.unitLength;
       if (!!style) {
@@ -237,6 +241,7 @@ class Styler{
       var ctx = canvas.getContext('2d');
       
       this.undrawPiece(ctx, srow, scol);
+      this.undrawPiece(ctx, erow, ecol);
       this.drawPiece(ctx, char, erow, ecol);
       var color = 'black'
       if(char == 'P')

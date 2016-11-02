@@ -35,17 +35,27 @@ class Game {
     }
 
 
-    runGame(){
-        while(true){
-            if(this.is_final_state(this.board, this.active_player)){
-                //do some stuff for finish
+    runGame(run){
+
+        this.players[this.active_player].strategy(this, function(game, playerHasNoMoreMoves){
+            
+            if(playerHasNoMoreMoves){
+
+                var msg = "Game finished in " + run + " moves. Winner: Player #" + game.active_player % 2 + 1 + " (player " + game.active_player + " was left out of moves.";
+                game.styler.displayMessage(msg);
+                return;
             }
 
-            me = this;
-            this.players[this.active_player].strategy(function(){
-                me.set_active_player(me.active_player % 2 + 1);
-            })
-        }
+            if(game.is_final_state(game.board, game.active_player)){
+                var msg = "Game finished in " + run + " moves. Winner: Player #" + game.active_player;
+                game.styler.displayMessage(msg);
+                return;
+            }
+
+            // next
+            game.set_active_player(game.active_player % 2 + 1);
+            game.runGame(run + 1);
+        });
     }
 
     /**
@@ -72,9 +82,9 @@ class Game {
      */
     do_transition(board, pawn_id, playerid, new_x, new_y) {
 
-        var output = _.cloneDeep(board); //create a copy of the board
+        var output = _.cloneDeep(board);
         var pid = playerid - 1;
-        var pawn = output.Pawns[pid][pawn_id];
+        var pawn = output.pawns[pid][pawn_id];
         console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
 
         var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
@@ -84,26 +94,27 @@ class Game {
         }
         output.Table[pawn.y][pawn.x] = 0;
 
-        (output.Pawns[pid][pawn_id]).prev_x = pawn.x;
-        (output.Pawns[pid][pawn_id]).prev_x = pawn.y;
-        (output.Pawns[pid][pawn_id]).x = new_x;
-        (output.Pawns[pid][pawn_id]).y = new_y;
-        (output.Pawns[pid][pawn_id]).was_moved_prev = true;
-        for(var i=0; i<(output.Pawns[pid]).length; i++)
-            if (i!=pawn_id)
-                (output.Pawns[pid][i])=false;
+        (output.pawns[pid][pawn_id]).prev_x = pawn.x;
+        (output.pawns[pid][pawn_id]).prev_x = pawn.y;
+        (output.pawns[pid][pawn_id]).x = new_x;
+        (output.pawns[pid][pawn_id]).y = new_y;
+        (output.pawns[pid][pawn_id]).was_moved_prev = true;
+        for(var i = 0; i < (output.pawns[pid]).length; i++)
+            if (i != pawn_id)
+                (output.pawns[pid][i]).was_moved_prev = false;
+        
         if (check.type_move == 'attack') {
             var opponent = 3 - playerid - 1;
-            output.Pawns[opponent] = _.remove(output.Pawns[opponent], function(pawn) {
-                return pawn.X == new_x && pawn.Y == new_y;
-            });
+            for(var i = 0; i < 8; i ++)
+                if(output.pawns[opponent][i].x == new_x && output.pawns[opponent][i].y == new_y ){
+                    output.pawns[opponent][i].IsOut = true;
+                    break;
+                }
         }
+
         if (check.type_move == 'enpassan') {
             var opponent = 3 - playerid - 1;
-            ate_pawn = output.Pawns[opponent][check.ate_pawn];
-            output.Pawns[opponent] = _.remove(output.Pawns[opponent], function(pawn) {
-                return pawn.X == ate_pawn.X && pawn.Y == ate_pawn.Y;
-            });
+            output.pawns[opponent][check.ate_pawn].IsOut = true;
         }
         output.Table[new_y][new_x] = playerid;
 
@@ -158,22 +169,30 @@ class Game {
                     'type_move': 'forward'
                 };
             if (move_length == 2) {
-                if (board.Table[new_y + factor * 1][new_x] == 0 && board.Table[new_y][new_x] == 0) {
-                    if (factor == -1)
+                try {
+                    if (board.Table[new_y + factor * (-1)][new_x] == 0 && board.Table[new_y][new_x] == 0) {
+                        if (factor == -1)
+                            return {
+                                'is_valid': pawn.Y == 6,
+                                'type_move': 'forward'
+                            };
                         return {
-                            'is_valid': pawn.Y == 6,
+                            'is_valid': pawn.Y == 1,
                             'type_move': 'forward'
                         };
+                    }
+                } catch (error) {
                     return {
-                        'is_valid': pawn.Y == 1,
-                        'type_move': 'forward'
+                        'is_valid': false,
+                        'type_move': null
                     };
                 }
-            } else
-                return {
-                    'is_valid': false,
-                    'type_move': null
-                };
+                
+            }
+            return {
+                'is_valid': false,
+                'type_move': null
+            };
         }
 
         // chech if i can move by diagonal
@@ -229,6 +248,8 @@ class Game {
         var player_pawns = board.pawns[playerid - 1];
         for (var i = 0; i < 8; i++) {
             var pawn = player_pawns[i];
+            if(pawn.IsOut)
+                continue;
             if (pawn.y == target_line)
                 return true;
         }
@@ -290,6 +311,8 @@ class Game {
         var me = this;
         for (var index = 0; index < pawns.length; index++) {
             var pawn = pawns[index];
+            if(pawn.IsOut)
+                continue;
             output = _.concat(output, me.getAllMovesForPawn(board, pawn, index, playerid));
         };
 
