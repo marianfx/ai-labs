@@ -6,6 +6,7 @@ class Pawn {
         this.y = y;
         this.prev_x = x;
         this.prev_y = y;
+        this.was_moved_prev = false;
         this.color = color;
     }
 

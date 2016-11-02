@@ -56,8 +56,10 @@ class Game {
         (output.Pawns[pid][pawn_id]).prev_x = pawn.y;
         (output.Pawns[pid][pawn_id]).x = new_x;
         (output.Pawns[pid][pawn_id]).y = new_y;
-
-
+        (output.Pawns[pid][pawn_id]).was_moved_prev = true;
+        for(var i=0; i<(output.Pawns[pid]).length; i++)
+            if (i!=pawn_id)
+                (output.Pawns[pid][i])=false;
         if (check.type_move == 'attack') {
             var opponent = 3 - playerid - 1;
             output.Pawns[opponent] = _.remove(output.Pawns[opponent], function(pawn) {
@@ -66,7 +68,10 @@ class Game {
         }
         if (check.type_move == 'enpassan') {
             var opponent = 3 - playerid - 1;
-            output.Pawns[opponent][check.ate_pawn] = null;
+            ate_pawn = output.Pawns[opponent][check.ate_pawn];
+            output.Pawns[opponent] = _.remove(output.Pawns[opponent], function(pawn) {
+                return pawn.X == ate_pawn.X && pawn.Y == ate_pawn.Y;
+            });
         }
         output.Table[new_y][new_x] = playerid;
 
@@ -162,7 +167,7 @@ class Game {
                         return false
                     if (pawn.y == line && pawn.x == new_x)
                         return  (pawn.x == pawn.prev_x &&
-                            Math.abs(pawn.y - pawn.prev_y) == 2); 
+                            Math.abs(pawn.y - pawn.prev_y) == 2 && pawn.last_moved ); 
                 })
             if (op_pawn_id > -1)
                 return {
