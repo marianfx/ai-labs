@@ -231,7 +231,11 @@ class Styler{
       obj.movePieceVisually(ctx, 'p', obj.activePiece.loc[0], obj.activePiece.loc[1], row, col);
     }
 
-    movePieceVisually(ctx, char, srow, scol, erow, ecol){
+    movePieceVisually(char, srow, scol, erow, ecol){
+      
+      var canvas = document.getElementById('board');
+      var ctx = canvas.getContext('2d');
+      
       this.undrawPiece(ctx, srow, scol);
       this.drawPiece(ctx, char, erow, ecol);
       var color = 'black'

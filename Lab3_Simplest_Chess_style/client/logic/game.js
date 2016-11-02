@@ -2,12 +2,18 @@ import * as _ from 'lodash'
 
 import {Board} from '../models/board'
 import {Pawn} from '../models/pawn'
+import {Move} from '../models/move'
 import {Styler} from '../interface/styler'
+import {Player} from './player'
+import {RandomPlayer} from './randomplayer'
 
 class Game {
 
     constructor() {
         this.board = new Board();
+
+        this.players = [null, new RandomPlayer(1, this), new RandomPlayer(2, this)]
+
         this.styler = new Styler();
         this.styler.prepareChessBoard();
         this.active_player = 2;
@@ -28,6 +34,20 @@ class Game {
         this.table = value;
     }
 
+
+    runGame(){
+        while(true){
+            if(this.is_final_state(this.board, this.active_player)){
+                //do some stuff for finish
+            }
+
+            me = this;
+            this.players[this.active_player].strategy(function(){
+                me.set_active_player(me.active_player % 2 + 1);
+            })
+        }
+    }
+
     /**
      * @param {Number} playerid
      */
@@ -35,6 +55,17 @@ class Game {
         this.active_player = playerid;
         this.styler.currentPlayer = playerid;
     }
+
+
+    /**
+     * @param {Board} board - The board to start from
+     * @param {Move} move - the move to execute
+     * @returns {Board} - The new board, created after executing the move.
+     */
+    get_board_from_move(board, move){
+        return this.do_transition(board, move.PawnID, move.PlayerID, move.X, move.Y);
+    }
+
 
     /**
      * @returns {Board} A new Board (deep copied) with the given transition executed.
@@ -45,6 +76,7 @@ class Game {
         var pid = playerid - 1;
         var pawn = output.Pawns[pid][pawn_id];
         console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+
         var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
         if (check.is_valid == false) {
             console.log("Tried to do invalid transition.");
@@ -204,48 +236,53 @@ class Game {
 
     }
 
-    getAllBoardsForPawn(board, pown, pid, playerid) {
+    /**
+     * @param {Board} board
+     * @param {Pawn} pawn
+     * @param {Number} pid
+     * @param {Number} playerid
+     * @Returns {Move[]} A list of moves. 
+     */
+    getAllMovesForPawn(board, pawn, pid, playerid) {
         var factor = 1; //going down
         if (playerid == 2)
             factor = -1; //going up
         var output = [];
 
         // one position - forward
-        var newY = pown.Y + factor * 1;
-        var upBoard = this.do_transition(board, pid, playerid, pown.X, newY);
-        if (upBoard != null)
-            output.push(upBoard);
+        var move = new Move(pawn.X, pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+        var state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+        if (state.is_valid)
+            output.push(move);
 
         // two positions - forward
-        newY = pown.Y + factor * 2;
-        var upUpBoard = this.do_transition(board, pid, playerid, pown.X, newY);
-        if (upUpBoard != null)
-            output.push(upUpBoard);
+        move = new Move(pawn.X, pawn.Y + factor * 2, pawn.X, pawn.Y, pid, playerid);
+        state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+        if (state.is_valid)
+            output.push(move);
 
         // right corner (+1, +1)
-        var newX = pown.X + factor * 1;
-        newY = pown.Y + factor * 1;
-        var rightCorner = this.do_transition(board, pid, playerid, newX, newY);
-        if (rightCorner != null)
-            output.push(rightCorner);
+        move = new Move(pawn.X + factor * 1, pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+        state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+        if (state.is_valid)
+            output.push(move);
 
         // left corner
-        newX = pown.X - (factor * 1);
-        newY = pown.Y + factor * 1;
-        var leftCorner = this.do_transition(board, pid, playerid, newX, newY);
-        if (leftCorner != null)
-            output.push(leftCorner);
+        move = new Move(pawn.X - (factor * 1), pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+        state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+        if (state.is_valid)
+            output.push(move);
 
         return output;
     }
 
     /**
-     * Given a board, computes all the board states available for that board, given the current player as playerid.
+     * Given a board, computes all the moves available for that board, given the current player as playerid.
      * @param {Board} board
      * @param {Number} playerid
-     * @returns {Board[]} An array of Board, as all the available states.
+     * @returns {Move[]} An array of moves (Move)..
      */
-    getAllAvailableBoards(board, playerid) {
+    getAllAvailableMovesForPlayer(board, playerid) {
         var pawns = board.BlackPawns;
         if (playerid == 1)
             pawns = board.WhitePawns;
@@ -253,7 +290,7 @@ class Game {
         var me = this;
         for (var index = 0; index < pawns.length; index++) {
             var pawn = pawns[index];
-            output = _.concat(output, me.getAllBoardsForPawn(board, pawn, index, playerid));
+            output = _.concat(output, me.getAllMovesForPawn(board, pawn, index, playerid));
         };
 
         return output;

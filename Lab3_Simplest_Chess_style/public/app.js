@@ -9,10 +9,7 @@ var _game = require('./logic/game');
 
 var theGame = new _game.Game();
 
-theGame.getAllBoardsForPawn(theGame.board, theGame.board.BlackPawns[0], 0, 2);
-theGame.getAllAvailableBoards(theGame.board, 2);
-
-},{"./logic/game":3,"./models/board":4,"./models/pawn":5}],2:[function(require,module,exports){
+},{"./logic/game":3,"./models/board":6,"./models/pawn":8}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -271,7 +268,11 @@ var Styler = function () {
     }
   }, {
     key: 'movePieceVisually',
-    value: function movePieceVisually(ctx, char, srow, scol, erow, ecol) {
+    value: function movePieceVisually(char, srow, scol, erow, ecol) {
+
+      var canvas = document.getElementById('board');
+      var ctx = canvas.getContext('2d');
+
       this.undrawPiece(ctx, srow, scol);
       this.drawPiece(ctx, char, erow, ecol);
       var color = 'black';
@@ -316,7 +317,7 @@ var Styler = function () {
 
 exports.Styler = Styler;
 
-},{"sweetAlert":15}],3:[function(require,module,exports){
+},{"sweetAlert":18}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -334,7 +335,13 @@ var _board = require('../models/board');
 
 var _pawn = require('../models/pawn');
 
+var _move = require('../models/move');
+
 var _styler = require('../interface/styler');
+
+var _player = require('./player');
+
+var _randomplayer = require('./randomplayer');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -345,6 +352,9 @@ var Game = function () {
         _classCallCheck(this, Game);
 
         this.board = new _board.Board();
+
+        this.players = [null, new _randomplayer.RandomPlayer(1, this), new _randomplayer.RandomPlayer(2, this)];
+
         this.styler = new _styler.Styler();
         this.styler.prepareChessBoard();
         this.active_player = 2;
@@ -352,15 +362,41 @@ var Game = function () {
     }
 
     _createClass(Game, [{
-        key: 'set_active_player',
+        key: 'runGame',
+        value: function runGame() {
+            while (true) {
+                if (this.is_final_state(this.board, this.active_player)) {
+                    //do some stuff for finish
+                }
 
+                me = this;
+                this.players[this.active_player].strategy(function () {
+                    me.set_active_player(me.active_player % 2 + 1);
+                });
+            }
+        }
 
         /**
          * @param {Number} playerid
          */
+
+    }, {
+        key: 'set_active_player',
         value: function set_active_player(playerid) {
             this.active_player = playerid;
             this.styler.currentPlayer = playerid;
+        }
+
+        /**
+         * @param {Board} board - The board to start from
+         * @param {Move} move - the move to execute
+         * @returns {Board} - The new board, created after executing the move.
+         */
+
+    }, {
+        key: 'get_board_from_move',
+        value: function get_board_from_move(board, move) {
+            return this.do_transition(board, move.PawnID, move.PlayerID, move.X, move.Y);
         }
 
         /**
@@ -375,6 +411,7 @@ var Game = function () {
             var pid = playerid - 1;
             var pawn = output.Pawns[pid][pawn_id];
             console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+
             var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
             if (check.is_valid == false) {
                 console.log("Tried to do invalid transition.");
@@ -507,55 +544,62 @@ var Game = function () {
             }
             return false;
         }
+
+        /**
+         * @param {Board} board
+         * @param {Pawn} pawn
+         * @param {Number} pid
+         * @param {Number} playerid
+         * @Returns {Move[]} A list of moves. 
+         */
+
     }, {
-        key: 'getAllBoardsForPawn',
-        value: function getAllBoardsForPawn(board, pown, pid, playerid) {
+        key: 'getAllMovesForPawn',
+        value: function getAllMovesForPawn(board, pawn, pid, playerid) {
             var factor = 1; //going down
             if (playerid == 2) factor = -1; //going up
             var output = [];
 
             // one position - forward
-            var newY = pown.Y + factor * 1;
-            var upBoard = this.do_transition(board, pid, playerid, pown.X, newY);
-            if (upBoard != null) output.push(upBoard);
+            var move = new _move.Move(pawn.X, pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+            var state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+            if (state.is_valid) output.push(move);
 
             // two positions - forward
-            newY = pown.Y + factor * 2;
-            var upUpBoard = this.do_transition(board, pid, playerid, pown.X, newY);
-            if (upUpBoard != null) output.push(upUpBoard);
+            move = new _move.Move(pawn.X, pawn.Y + factor * 2, pawn.X, pawn.Y, pid, playerid);
+            state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+            if (state.is_valid) output.push(move);
 
             // right corner (+1, +1)
-            var newX = pown.X + factor * 1;
-            newY = pown.Y + factor * 1;
-            var rightCorner = this.do_transition(board, pid, playerid, newX, newY);
-            if (rightCorner != null) output.push(rightCorner);
+            move = new _move.Move(pawn.X + factor * 1, pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+            state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+            if (state.is_valid) output.push(move);
 
             // left corner
-            newX = pown.X - factor * 1;
-            newY = pown.Y + factor * 1;
-            var leftCorner = this.do_transition(board, pid, playerid, newX, newY);
-            if (leftCorner != null) output.push(leftCorner);
+            move = new _move.Move(pawn.X - factor * 1, pawn.Y + factor * 1, pawn.X, pawn.Y, pid, playerid);
+            state = this.is_valid_transition(board, pid, playerid, move.X, move.Y);
+            if (state.is_valid) output.push(move);
 
             return output;
         }
 
         /**
-         * Given a board, computes all the board states available for that board, given the current player as playerid.
+         * Given a board, computes all the moves available for that board, given the current player as playerid.
          * @param {Board} board
          * @param {Number} playerid
-         * @returns {Board[]} An array of Board, as all the available states.
+         * @returns {Move[]} An array of moves (Move)..
          */
 
     }, {
-        key: 'getAllAvailableBoards',
-        value: function getAllAvailableBoards(board, playerid) {
+        key: 'getAllAvailableMovesForPlayer',
+        value: function getAllAvailableMovesForPlayer(board, playerid) {
             var pawns = board.BlackPawns;
             if (playerid == 1) pawns = board.WhitePawns;
             var output = [];
             var me = this;
             for (var index = 0; index < pawns.length; index++) {
                 var pawn = pawns[index];
-                output = _.concat(output, me.getAllBoardsForPawn(board, pawn, index, playerid));
+                output = _.concat(output, me.getAllMovesForPawn(board, pawn, index, playerid));
             };
 
             return output;
@@ -583,7 +627,122 @@ var Game = function () {
 
 exports.Game = Game;
 
-},{"../interface/styler":2,"../models/board":4,"../models/pawn":5,"lodash":6}],4:[function(require,module,exports){
+},{"../interface/styler":2,"../models/board":6,"../models/move":7,"../models/pawn":8,"./player":4,"./randomplayer":5,"lodash":9}],4:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Player = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _move = require("../models/move");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Player = function () {
+
+    /**
+     * @param {Number} theId
+     * @param {Game} theGame
+     */
+    function Player(theId, theGame) {
+        _classCallCheck(this, Player);
+
+        if (this.constructor === Player) throw new TypeError("Cannot construct instances of the abstract class Player.");
+
+        if (this.strategy === undefined) throw new TypeError("Method strategy must be overriden.");
+
+        this.game = theGame;
+        this.id = theId;
+    }
+
+    /**
+     * @param {Move} move
+     */
+
+
+    _createClass(Player, [{
+        key: "executeMove",
+        value: function executeMove(move) {
+
+            this.game.Board = this.game.get_board_from_move(this.game.board, move);
+            var chr = 'p';
+            if (this.game.active_player == 1) chr = 'P';
+            this.game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
+        }
+    }]);
+
+    return Player;
+}();
+
+exports.Player = Player;
+
+},{"../models/move":7}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.RandomPlayer = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = require('lodash');
+
+var _ = _interopRequireWildcard(_lodash);
+
+var _player = require('./player');
+
+var _game = require('./game');
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var RandomPlayer = function (_Player) {
+    _inherits(RandomPlayer, _Player);
+
+    /**
+     * @param {Number} theId
+     * @param {Game} theGame
+     */
+    function RandomPlayer(theId, theGame) {
+        _classCallCheck(this, RandomPlayer);
+
+        return _possibleConstructorReturn(this, (RandomPlayer.__proto__ || Object.getPrototypeOf(RandomPlayer)).call(this, theId, theGame));
+    }
+
+    /**
+     * Selects pieces randomly
+     * @param {Function} callback
+     */
+
+
+    _createClass(RandomPlayer, [{
+        key: 'strategy',
+        value: function strategy(callback) {
+            var possibleMoves = this.game.getAllAvailableMovesForPlayer(this.game.board, this.id);
+            var n = _.size(possibleMoves);
+            var randNr = Math.random() * n;
+            var move = possibleMoves[randNr];
+
+            this.executeMove(move);
+            callback();
+        }
+    }]);
+
+    return RandomPlayer;
+}(_player.Player);
+
+exports.RandomPlayer = RandomPlayer;
+
+},{"./game":3,"./player":4,"lodash":9}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -684,7 +843,37 @@ var Board = function () {
 
 exports.Board = Board;
 
-},{"./pawn":5,"lodash":6}],5:[function(require,module,exports){
+},{"./pawn":8,"lodash":9}],7:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Move =
+
+/**
+ * @param {Number} x - The X (Horizontal / Columns) parameter of the move.
+ * @param {Number} y - The Y (vertical / rows) parameter of the move.
+ * @param {Number} pawn_id - The id of the pawn moved
+ * @param {Number} player_id - The id of the player moving the pawn.
+ */
+function Move(x, y, old_x, old_y, pawn_id, player_id) {
+    _classCallCheck(this, Move);
+
+    this.X = x;
+    this.Y = y;
+    this.XOld = old_x;
+    this.YOld = old_y;
+    this.PawnID = pawn_id;
+    this.PlayerID = player_id;
+};
+
+exports.Move = Move;
+
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -739,7 +928,7 @@ var Pawn = function () {
 
 exports.Pawn = Pawn;
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -17725,7 +17914,7 @@ exports.Pawn = Pawn;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -17758,7 +17947,7 @@ var defaultParams = {
 
 exports['default'] = defaultParams;
 module.exports = exports['default'];
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -17894,7 +18083,7 @@ exports['default'] = {
   handleCancel: handleCancel
 };
 module.exports = exports['default'];
-},{"./handle-dom":9,"./handle-swal-dom":11,"./utils":14}],9:[function(require,module,exports){
+},{"./handle-dom":12,"./handle-swal-dom":14,"./utils":17}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18086,7 +18275,7 @@ exports.fadeIn = fadeIn;
 exports.fadeOut = fadeOut;
 exports.fireClick = fireClick;
 exports.stopEventPropagation = stopEventPropagation;
-},{}],10:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18166,7 +18355,7 @@ var handleKeyDown = function handleKeyDown(event, params, modal) {
 
 exports['default'] = handleKeyDown;
 module.exports = exports['default'];
-},{"./handle-dom":9,"./handle-swal-dom":11}],11:[function(require,module,exports){
+},{"./handle-dom":12,"./handle-swal-dom":14}],14:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -18334,7 +18523,7 @@ exports.openModal = openModal;
 exports.resetInput = resetInput;
 exports.resetInputError = resetInputError;
 exports.fixVerticalPosition = fixVerticalPosition;
-},{"./default-params":7,"./handle-dom":9,"./injected-html":12,"./utils":14}],12:[function(require,module,exports){
+},{"./default-params":10,"./handle-dom":12,"./injected-html":15,"./utils":17}],15:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18377,7 +18566,7 @@ var injectedHTML =
 
 exports["default"] = injectedHTML;
 module.exports = exports["default"];
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18603,7 +18792,7 @@ var setParameters = function setParameters(params) {
 
 exports['default'] = setParameters;
 module.exports = exports['default'];
-},{"./handle-dom":9,"./handle-swal-dom":11,"./utils":14}],14:[function(require,module,exports){
+},{"./handle-dom":12,"./handle-swal-dom":14,"./utils":17}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18677,7 +18866,7 @@ exports.hexToRgb = hexToRgb;
 exports.isIE8 = isIE8;
 exports.logStr = logStr;
 exports.colorLuminance = colorLuminance;
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -18981,4 +19170,4 @@ if (typeof window !== 'undefined') {
   _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
 }
 module.exports = exports['default'];
-},{"./modules/default-params":7,"./modules/handle-click":8,"./modules/handle-dom":9,"./modules/handle-key":10,"./modules/handle-swal-dom":11,"./modules/set-params":13,"./modules/utils":14}]},{},[1]);
+},{"./modules/default-params":10,"./modules/handle-click":11,"./modules/handle-dom":12,"./modules/handle-key":13,"./modules/handle-swal-dom":14,"./modules/set-params":16,"./modules/utils":17}]},{},[1]);
