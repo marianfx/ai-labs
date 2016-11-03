@@ -40,7 +40,7 @@ class HumanPlayer extends Player{
 
         if(move.X != move.XOld || move.Y != move.YOld){
             var msg = "Invalid move. Check the rules.";
-            this.game.styler.sweetAlert(msg, true);
+            this.game.styler.displayMessage(msg, true);
         }
             
         this.game.styler.drawSquare(null, move.YOld, move.XOld);

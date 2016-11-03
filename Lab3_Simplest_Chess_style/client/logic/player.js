@@ -28,6 +28,7 @@ class Player{
         if (game.active_player == 1)
             chr = 'P'
         game.styler.movePieceVisually(chr, move.YOld, move.XOld, move.Y, move.X);
+        game.styler.addMove(move);
     }
 }
 

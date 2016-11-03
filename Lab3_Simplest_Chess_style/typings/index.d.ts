@@ -7,4 +7,5 @@
 /// <reference path="globals/es2015-string/index.d.ts" />
 /// <reference path="globals/es2015-symbol/index.d.ts" />
 /// <reference path="globals/es2015/index.d.ts" />
+/// <reference path="globals/jquery/index.d.ts" />
 /// <reference path="globals/lodash/index.d.ts" />

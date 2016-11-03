@@ -93,13 +93,14 @@ class Styler{
         }]
       };
       this.sweetAlert = require("sweetAlert");
+      this.$ = require('jquery')
     }
     
     displayMessage(message, isError){
       if(isError)
-        this.sweetAlert(message, 'error')
+        this.sweetAlert("Oops...", message, 'error')
       else
-        this.sweetAlert(message)
+        this.sweetAlert("Hmm...", message)
     }
 
     drawSquare(ctx, row, col, style) {
@@ -246,7 +247,7 @@ class Styler{
       if (!obj.activePiece) {
         return;
       }
-      
+
       var startY = obj.activePiece.loc[0];
       var startX = obj.activePiece.loc[1];
       var endY = row;
@@ -288,6 +289,16 @@ class Styler{
             this.armies[color][i].loc[1] = ecol;
         }
       }
+    }
+
+    /**
+     * @param {Move} move
+     */
+    addMove(move){
+        var str = "Move: Player " + move.PlayerID + ", pawn " + move.PawnID + " from (" + (move.YOld + 1) + "," + (move.XOld + 1) + ") to (" + (move.Y + 1) + "," + (move.X + 1) + ").";
+        
+        this.$('#moves' + (3 - move.PlayerID)).prepend("<li class=\"collection-item\">" + "<br/>" + "</li>");
+        this.$('#moves' + move.PlayerID).prepend("<li class=\"collection-item\">" + str + "</li>");
     }
 
     /**
