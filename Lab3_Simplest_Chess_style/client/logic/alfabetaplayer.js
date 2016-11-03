@@ -17,11 +17,11 @@ class AlfaBetaPlayer extends Player {
      */
     constructor(theId, theGame) {
         super(theId, theGame);
-        this.graph = new Graph(this.game);
+        this.graph = new Graph(this.id, this.game);
     }
 
     strategy(game, callback) {
-        this.graph = new Graph(this.game);
+        this.graph = new Graph(this.id, game);
 
         var movesTree = this.graph.makeTree();
         console.log(movesTree.edges())
@@ -56,7 +56,7 @@ class AlfaBetaPlayer extends Player {
             console.log("Nod frunza")
             console.log(node)
             console.log(this.graph.g.node(node));
-            return this.getScoreForBoard(node);
+            return this.getScoreForBoard(this.graph.g.node(node).board);
 
         }
 

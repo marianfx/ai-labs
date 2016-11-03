@@ -1,10 +1,11 @@
-
+import * as _ from "lodash"
 import * as gr from "graphlib"
 
 class Graph{
 
-    constructor(theGame){
+    constructor(theId, theGame){
         this.g = new gr.Graph();
+        this.id = theId;
         this.game = theGame;
     }
 
