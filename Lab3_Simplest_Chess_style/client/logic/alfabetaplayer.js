@@ -13,15 +13,18 @@ class AlfaBetaPlayer extends Player{
         this.g = new gr.Graph()
     }
 
-    strategy(callback){
+    strategy(game, callback){
         this.g = new gr.Graph()
         var movesTree = this.makeTree(this.game)
         console.log(movesTree.edges())
-        var move = this.alphabeta(this.game.board, 5, 
+        var move = (this.alphabeta(this.game.board, 5, 
                   Number.MIN_SAFE_INTEGER,
                   Number.MAX_SAFE_INTEGER,
-                  true);
+                  true)).m.move;
+        console.log("alfa beta move:");
         console.log(move);
+        this.executeMove(game, move);
+        callback(game)
     }
     alphabeta(node, depth, alfa, beta, maximizingPlayer){
         var childNodes = this.g.outEdges(node);

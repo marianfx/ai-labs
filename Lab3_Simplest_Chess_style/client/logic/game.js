@@ -7,13 +7,14 @@ import {Styler} from '../interface/styler'
 import {Player} from './player'
 import {RandomPlayer} from './randomplayer'
 import {HumanPlayer} from './humanplayer'
+import {AlfaBetaPlayer} from './alfabetaplayer'
 
 class Game {
 
     constructor() {
         this.board = new Board();
 
-        this.players = [null, new RandomPlayer(1, this), new HumanPlayer(2, this)]
+        this.players = [null, new AlfaBetaPlayer(1, this), new HumanPlayer(2, this)]
 
         this.active_player = 2;
 
