@@ -7,6 +7,7 @@ class Graph{
         this.g = new gr.Graph();
         this.id = theId;
         this.game = theGame;
+        this.depth = 3;
     }
 
 
@@ -15,7 +16,7 @@ class Graph{
         this.g.setNode(root, {
             board: root
         });
-        this.expandNode(root, true, 2);
+        this.expandNode(root, true, this.depth);
         return this.g;
     }
 
@@ -28,14 +29,14 @@ class Graph{
             var pid = this.id;
         else
             var pid = 3 - this.id;
-        console.log("player" + pid + " on level" + depth);
+        //console.log("player" + pid + " on level" + depth);
         var moves = this.game.getAllAvailableMovesForPlayer(board, pid)
-        console.log(moves);
+        //console.log(moves);
         var childrens = []
         for (var i = 0; i < _.size(moves); i++) {
             var move = moves[i]
-            console.log('Move :(' + move.XOld + ',' + move.YOld + ')=>' + '(' + move.X + ',' + move.Y + ')')
-            var new_board = this.game.do_transition(this.game.board,
+            //console.log('Move :(' + move.XOld + ',' + move.YOld + ')=>' + '(' + move.X + ',' + move.Y + ')')
+            var new_board = this.game.do_transition(board,
                 move.PawnID,
                 move.PlayerID,
                 move.X,

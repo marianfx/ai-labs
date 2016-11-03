@@ -435,26 +435,103 @@ var AlfaBetaPlayer = function (_Player) {
             this.graph = new _graph.Graph(this.id, game);
 
             var movesTree = this.graph.makeTree();
-            console.log(movesTree.edges());
+            //console.log(movesTree.edges())
 
             var move = this.alphabeta(this.game.board, 5, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, true).m.move;
 
-            console.log("alfa beta move:");
-            console.log(move);
+            //console.log("alfa beta move:");
+            //console.log(move);
 
             this.executeMove(game, move);
             callback(game);
         }
 
         /**
-         * @param {Board} node
+         * @param {Board} board
          */
 
     }, {
         key: "getScoreForBoard",
-        value: function getScoreForBoard(node) {
+        value: function getScoreForBoard(board) {
+            var p1 = 1;
+            var p2 = 2;
+
+            // check final state
+            var isFinalStateP1 = this.game.is_final_state(board, p1);
+            var fp1 = 0;
+            var fp2 = 0;
+            if (isFinalStateP1) fp1 = 1;
+            if (isFinalStateP2) fp2 = 1;
+            var isFinalStateP2 = this.game.is_final_state(board, p2);
+
+            //nr pioni
+            var P1 = 0;
+            var P2 = 0;
+            for (var i = 0; i < 8; i++) {
+                if (!board.pawns[0][i].IsOut) P1 += 1;
+                if (!board.pawns[1][i].IsOut) P2 += 1;
+            }
+
+            // mobility
+            var M1 = this.game.getAllAvailableMovesForPlayer(board, p1);
+            var M2 = this.game.getAllAvailableMovesForPlayer(board, p2);
+
+            //pawns I can eat
+            var D1 = 0;
+            var D2 = 0;
+            for (var i = 0; i < _.size(M1); i++) {
+                var move = M1[i];
+                var output = this.game.is_valid_transition(board, move.PawnID, move.PlayerID, move.X, move.Y);
+                if (output.type_move == 'attack' || output.type_move == 'enpassan') D1 += 1;
+            }
+
+            for (var i = 0; i < _.size(M2); i++) {
+                var move = M2[i];
+                var output = this.game.is_valid_transition(board, move.PawnID, move.PlayerID, move.X, move.Y);
+                if (output.type_move == 'attack' || output.type_move == 'enpassan') D2 += 1;
+            }
+
+            //straight way
+            var C1 = 0;
+            var C2 = 0;
+            var DST1 = 6;
+            var DST2 = 6;
+            for (var i = 0; i < _.size(board.pawns[0]); i++) {
+                var pawn = board.pawns[0][i];
+                var clr = true;
+                for (var j = pawn.y; j <= 7; j++) {
+                    if (board.table[j][pawn.x] == 2) clr = false;
+                }
+                if (clr) {
+                    C1 += 1;
+                    var tempDST = Math.abs(pawn.y - 7);
+                    if (tempDST < DST1) DST1 = tempDST;
+                }
+            }
+
+            for (var i = 0; i < _.size(board.pawns[1]); i++) {
+                var pawn = board.pawns[1][i];
+                var clr = true;
+                for (var j = pawn.y; j >= 0; j--) {
+                    if (board.table[j][pawn.x] == 1) clr = false;
+                }
+
+                if (clr) {
+                    C2 += 1;
+                    var tempDST = pawn.y;
+                    if (tempDST < DST2) DST2 = tempDST;
+                }
+            }
+
+            var theScore = Number.MAX_SAFE_INTEGER * fp1 - Number.MAX_SAFE_INTEGER * fp2;
+            theScore += 10 * (P1 - P2);
+            theScore += 3 * (C1 - C2);
+            //theScore += 3 * (DST1 - DST2);
+            theScore += 2 * (D1 - D2);
+            theScore += _.size(M1) - _.size(M2);
+
             return {
-                score: Math.random() * 10,
+                score: theScore,
                 m: null
             };
         }
@@ -465,9 +542,9 @@ var AlfaBetaPlayer = function (_Player) {
             var v;
 
             if (depth == 0 || childNodes.length < 1) {
-                console.log("Nod frunza");
-                console.log(node);
-                console.log(this.graph.g.node(node));
+                //console.log("Nod frunza")
+                //console.log(node)
+                //console.log(this.graph.g.node(node));
                 return this.getScoreForBoard(this.graph.g.node(node).board);
             }
 
@@ -477,6 +554,7 @@ var AlfaBetaPlayer = function (_Player) {
 
                 for (var i = 0; i < childNodes.length; i++) {
                     var child = childNodes[i].w;
+                    //console.log(child);
                     var child_score = this.alphabeta(child, depth - 1, alfa, beta, false).score;
 
                     if (child_score >= v) {
@@ -498,7 +576,7 @@ var AlfaBetaPlayer = function (_Player) {
                 for (var i = 0; i < childNodes.length; i++) {
                     var child = childNodes[i].w;
                     // console.log("NOD INTERMEDIAR/final MIN");
-                    console.log(child);
+                    //console.log(child);
 
                     var child_score = this.alphabeta(child, depth - 1, alfa, beta, true).score;
                     if (child_score < v) {
@@ -633,11 +711,11 @@ var Game = function () {
             var output = _.cloneDeep(board);
             var pid = playerid - 1;
             var pawn = output.pawns[pid][pawn_id];
-            console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+            //console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
 
             var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
             if (check.is_valid == false) {
-                console.log("Tried to do invalid transition.");
+                //console.log("Tried to do invalid transition.");
                 return null;
             }
             output.Table[pawn.y][pawn.x] = 0;
@@ -895,6 +973,7 @@ var Graph = function () {
         this.g = new gr.Graph();
         this.id = theId;
         this.game = theGame;
+        this.depth = 3;
     }
 
     _createClass(Graph, [{
@@ -904,7 +983,7 @@ var Graph = function () {
             this.g.setNode(root, {
                 board: root
             });
-            this.expandNode(root, true, 2);
+            this.expandNode(root, true, this.depth);
             return this.g;
         }
     }, {
@@ -914,14 +993,14 @@ var Graph = function () {
             //create parent node
             var parent = board;
             if (maximizingPlayer) var pid = this.id;else var pid = 3 - this.id;
-            console.log("player" + pid + " on level" + depth);
+            //console.log("player" + pid + " on level" + depth);
             var moves = this.game.getAllAvailableMovesForPlayer(board, pid);
-            console.log(moves);
+            //console.log(moves);
             var childrens = [];
             for (var i = 0; i < _.size(moves); i++) {
                 var move = moves[i];
-                console.log('Move :(' + move.XOld + ',' + move.YOld + ')=>' + '(' + move.X + ',' + move.Y + ')');
-                var new_board = this.game.do_transition(this.game.board, move.PawnID, move.PlayerID, move.X, move.Y);
+                //console.log('Move :(' + move.XOld + ',' + move.YOld + ')=>' + '(' + move.X + ',' + move.Y + ')')
+                var new_board = this.game.do_transition(board, move.PawnID, move.PlayerID, move.X, move.Y);
                 childrens.push(new_board);
             }
 

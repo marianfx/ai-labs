@@ -88,11 +88,11 @@ class Game {
         var output = _.cloneDeep(board);
         var pid = playerid - 1;
         var pawn = output.pawns[pid][pawn_id];
-        console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
+        //console.log("Move: Player " + playerid + ", pawn " + pawn_id + " from (" + pawn.X + "," + pawn.Y + ") to (" + new_x + "," + new_y + ").");
 
         var check = this.is_valid_transition(board, pawn_id, playerid, new_x, new_y);
         if (check.is_valid == false) {
-            console.log("Tried to do invalid transition.");
+            //console.log("Tried to do invalid transition.");
             return null;
         }
         output.Table[pawn.y][pawn.x] = 0;
