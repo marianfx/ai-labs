@@ -15,6 +15,7 @@ class Player{
             throw new TypeError("Method strategy must be overriden.");
 
         this.id = theId;
+        this.game = theGame;
     }
 
 
