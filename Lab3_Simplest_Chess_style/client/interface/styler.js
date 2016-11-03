@@ -1,7 +1,14 @@
 
+import {Game} from '../logic/game'
+import {Move} from '../models/move'
+
 class Styler{
 
-    constructor(){
+    /**
+     * @param {Game} theGame
+     */
+    constructor(theGame){
+      this.game = theGame;
       this.defaults = {
         unitLength: 60, // Height / Width of a square
         fontSize: 40,
@@ -88,11 +95,20 @@ class Styler{
       this.sweetAlert = require("sweetAlert");
     }
     
-    displayMessage(message){
-      this.sweetAlert(message)
+    displayMessage(message, isError){
+      if(isError)
+        this.sweetAlert(message, 'error')
+      else
+        this.sweetAlert(message)
     }
 
     drawSquare(ctx, row, col, style) {
+
+      if(!ctx){
+        var canvas = document.getElementById('board');
+        ctx = canvas.getContext('2d');
+      }
+
       var len = this.defaults.unitLength;
       if (!!style) {
         ctx.fillStyle = this.defaults.colors[style];
@@ -114,6 +130,12 @@ class Styler{
     }
 
     drawPiece(ctx, char, row, col) {
+
+      if(!ctx){
+        var canvas = document.getElementById('board');
+        ctx = canvas.getContext('2d');
+      }
+
       var x = this.defaults.unitLength * col + (this.defaults.unitLength - this.defaults.fontSize) / 2;
       var y = this.defaults.unitLength * row - (this.defaults.unitLength - this.defaults.fontSize) / 4;
       var color = this.pieceSymbolMap[char].color;
@@ -198,7 +220,7 @@ class Styler{
         return;
       }
 
-      if(obj.activePiece.type != 'p'){
+      if(obj.game.board.table[row][col] == 1){
         obj.sweetAlert("Oops...", "You can move your pieces only!", "error");
         return;
       }
@@ -208,6 +230,9 @@ class Styler{
       obj.drawPiece(ctx, obj.activePiece.type, row, col);
     }
 
+    /**
+     * @param {Styler} obj
+     */
     cbReleasePiece(evt, obj) {
       //check if valid
       //if valid, drop piece there
@@ -221,18 +246,28 @@ class Styler{
       if (!obj.activePiece) {
         return;
       }
-
-      if(obj.currentPlayer != 2){
-        obj.sweetAlert("Oops...", "It is not your turn!", "error");
-        return;
+      
+      var startY = obj.activePiece.loc[0];
+      var startX = obj.activePiece.loc[1];
+      var endY = row;
+      var endX = col;
+      //get pawn id
+      var fp = null
+      var pid = null
+      var pawns = obj.game.board.pawns[obj.game.active_player - 1];
+      for(var i = 0; i < 8; i ++){
+        var pawn = pawns[i];
+        if(pawn.x == startX && pawn.y == startY){
+          fp = pawn;
+          pid = i
+          break;
+        }
       }
 
-      if(obj.activePiece.type != 'p'){
-        obj.sweetAlert("Oops...", "You can move your pieces only!", "error");
-        return;
-      }
+      var move = new Move(endX, endY, startX, startY, pid, obj.game.active_player)
 
-      obj.movePieceVisually(ctx, 'p', obj.activePiece.loc[0], obj.activePiece.loc[1], row, col);
+      obj.game.players[2].try_move(move);
+      //obj.movePieceVisually(ctx, 'p', startY, startX, endY, endX);
     }
 
     movePieceVisually(char, srow, scol, erow, ecol){
@@ -255,7 +290,11 @@ class Styler{
       }
     }
 
+    /**
+     * @param {Game} theGame
+     */
     prepareChessBoard() {
+      
       var canvas = document.getElementById('board');
       var ctx = canvas.getContext('2d');
 

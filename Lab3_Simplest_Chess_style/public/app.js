@@ -10,21 +10,31 @@ var _game = require('./logic/game');
 var theGame = new _game.Game();
 theGame.runGame(1);
 
-},{"./logic/game":3,"./models/board":6,"./models/pawn":8}],2:[function(require,module,exports){
+},{"./logic/game":3,"./models/board":7,"./models/pawn":9}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.Styler = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _game = require('../logic/game');
+
+var _move = require('../models/move');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Styler = function () {
-  function Styler() {
+
+  /**
+   * @param {Game} theGame
+   */
+  function Styler(theGame) {
     _classCallCheck(this, Styler);
 
+    this.game = theGame;
     this.defaults = {
       unitLength: 60, // Height / Width of a square
       fontSize: 40,
@@ -113,12 +123,18 @@ var Styler = function () {
 
   _createClass(Styler, [{
     key: 'displayMessage',
-    value: function displayMessage(message) {
-      this.sweetAlert(message);
+    value: function displayMessage(message, isError) {
+      if (isError) this.sweetAlert(message, 'error');else this.sweetAlert(message);
     }
   }, {
     key: 'drawSquare',
     value: function drawSquare(ctx, row, col, style) {
+
+      if (!ctx) {
+        var canvas = document.getElementById('board');
+        ctx = canvas.getContext('2d');
+      }
+
       var len = this.defaults.unitLength;
       if (!!style) {
         ctx.fillStyle = this.defaults.colors[style];
@@ -142,6 +158,12 @@ var Styler = function () {
   }, {
     key: 'drawPiece',
     value: function drawPiece(ctx, char, row, col) {
+
+      if (!ctx) {
+        var canvas = document.getElementById('board');
+        ctx = canvas.getContext('2d');
+      }
+
       var x = this.defaults.unitLength * col + (this.defaults.unitLength - this.defaults.fontSize) / 2;
       var y = this.defaults.unitLength * row - (this.defaults.unitLength - this.defaults.fontSize) / 4;
       var color = this.pieceSymbolMap[char].color;
@@ -235,7 +257,7 @@ var Styler = function () {
         return;
       }
 
-      if (obj.activePiece.type != 'p') {
+      if (obj.game.board.table[row][col] == 1) {
         obj.sweetAlert("Oops...", "You can move your pieces only!", "error");
         return;
       }
@@ -244,6 +266,11 @@ var Styler = function () {
       obj.drawSquare(ctx, row, col, 'active');
       obj.drawPiece(ctx, obj.activePiece.type, row, col);
     }
+
+    /**
+     * @param {Styler} obj
+     */
+
   }, {
     key: 'cbReleasePiece',
     value: function cbReleasePiece(evt, obj) {
@@ -260,17 +287,27 @@ var Styler = function () {
         return;
       }
 
-      if (obj.currentPlayer != 2) {
-        obj.sweetAlert("Oops...", "It is not your turn!", "error");
-        return;
+      var startY = obj.activePiece.loc[0];
+      var startX = obj.activePiece.loc[1];
+      var endY = row;
+      var endX = col;
+      //get pawn id
+      var fp = null;
+      var pid = null;
+      var pawns = obj.game.board.pawns[obj.game.active_player - 1];
+      for (var i = 0; i < 8; i++) {
+        var pawn = pawns[i];
+        if (pawn.x == startX && pawn.y == startY) {
+          fp = pawn;
+          pid = i;
+          break;
+        }
       }
 
-      if (obj.activePiece.type != 'p') {
-        obj.sweetAlert("Oops...", "You can move your pieces only!", "error");
-        return;
-      }
+      var move = new _move.Move(endX, endY, startX, startY, pid, obj.game.active_player);
 
-      obj.movePieceVisually(ctx, 'p', obj.activePiece.loc[0], obj.activePiece.loc[1], row, col);
+      obj.game.players[2].try_move(move);
+      //obj.movePieceVisually(ctx, 'p', startY, startX, endY, endX);
     }
   }, {
     key: 'movePieceVisually',
@@ -292,9 +329,15 @@ var Styler = function () {
         }
       }
     }
+
+    /**
+     * @param {Game} theGame
+     */
+
   }, {
     key: 'prepareChessBoard',
     value: function prepareChessBoard() {
+
       var canvas = document.getElementById('board');
       var ctx = canvas.getContext('2d');
 
@@ -324,7 +367,7 @@ var Styler = function () {
 
 exports.Styler = Styler;
 
-},{"sweetAlert":18}],3:[function(require,module,exports){
+},{"../logic/game":3,"../models/move":8,"sweetAlert":19}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -350,6 +393,8 @@ var _player = require('./player');
 
 var _randomplayer = require('./randomplayer');
 
+var _humanplayer = require('./humanplayer');
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -360,12 +405,13 @@ var Game = function () {
 
         this.board = new _board.Board();
 
-        this.players = [null, new _randomplayer.RandomPlayer(1, this), new _randomplayer.RandomPlayer(2, this)];
+        this.players = [null, new _randomplayer.RandomPlayer(1, this), new _humanplayer.HumanPlayer(2, this)];
 
-        this.styler = new _styler.Styler();
-        this.styler.prepareChessBoard();
         this.active_player = 2;
+
+        this.styler = new _styler.Styler(this);
         this.styler.currentPlayer = 2;
+        this.styler.prepareChessBoard();
     }
 
     _createClass(Game, [{
@@ -660,7 +706,97 @@ var Game = function () {
 
 exports.Game = Game;
 
-},{"../interface/styler":2,"../models/board":6,"../models/move":7,"../models/pawn":8,"./player":4,"./randomplayer":5,"lodash":9}],4:[function(require,module,exports){
+},{"../interface/styler":2,"../models/board":7,"../models/move":8,"../models/pawn":9,"./humanplayer":4,"./player":5,"./randomplayer":6,"lodash":10}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.HumanPlayer = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _lodash = require('lodash');
+
+var _ = _interopRequireWildcard(_lodash);
+
+var _player = require('./player');
+
+var _game = require('./game');
+
+var _move = require('../models/move');
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var HumanPlayer = function (_Player) {
+    _inherits(HumanPlayer, _Player);
+
+    /**
+     * @param {Number} theId
+     * @param {Game} theGame
+     */
+    function HumanPlayer(theId, theGame) {
+        _classCallCheck(this, HumanPlayer);
+
+        var _this = _possibleConstructorReturn(this, (HumanPlayer.__proto__ || Object.getPrototypeOf(HumanPlayer)).call(this, theId, theGame));
+
+        _this.game = theGame;
+        _this.cb = null;
+        return _this;
+    }
+
+    /**
+     * Selects pieces randomly
+     * @param {Function} callback
+     */
+
+
+    _createClass(HumanPlayer, [{
+        key: 'strategy',
+        value: function strategy(theGame, callback) {
+            //does nothing
+            this.game = theGame;
+            this.cb = callback;
+        }
+
+        /**
+         * @param {Move} move
+         */
+
+    }, {
+        key: 'try_move',
+        value: function try_move(move) {
+
+            if (this.game.is_valid_transition(this.game.board, move.PawnID, this.id, move.X, move.Y).is_valid) {
+
+                // all cool
+                this.executeMove(this.game, move);
+                return this.cb(this.game);
+            }
+            //invalid
+
+            if (move.X != move.XOld || move.Y != move.YOld) {
+                var msg = "Invalid move. Check the rules.";
+                this.game.styler.sweetAlert(msg, true);
+            }
+
+            this.game.styler.drawSquare(null, move.YOld, move.XOld);
+            this.game.styler.drawPiece(null, 'p', move.YOld, move.XOld);
+        }
+    }]);
+
+    return HumanPlayer;
+}(_player.Player);
+
+exports.HumanPlayer = HumanPlayer;
+
+},{"../models/move":8,"./game":3,"./player":5,"lodash":10}],5:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -711,7 +847,7 @@ var Player = function () {
 
 exports.Player = Player;
 
-},{"../models/move":7}],5:[function(require,module,exports){
+},{"../models/move":8}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -769,9 +905,7 @@ var RandomPlayer = function (_Player) {
             var move = possibleMoves[randNr];
 
             this.executeMove(game, move);
-            setTimeout(function () {
-                callback(game);
-            }, 2000);
+            callback(game);
         }
     }]);
 
@@ -780,7 +914,7 @@ var RandomPlayer = function (_Player) {
 
 exports.RandomPlayer = RandomPlayer;
 
-},{"./game":3,"./player":4,"lodash":9}],6:[function(require,module,exports){
+},{"./game":3,"./player":5,"lodash":10}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -881,7 +1015,7 @@ var Board = function () {
 
 exports.Board = Board;
 
-},{"./pawn":8,"lodash":9}],7:[function(require,module,exports){
+},{"./pawn":9,"lodash":10}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -911,7 +1045,7 @@ function Move(x, y, old_x, old_y, pawn_id, player_id) {
 
 exports.Move = Move;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -968,7 +1102,7 @@ var Pawn = function () {
 
 exports.Pawn = Pawn;
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -17954,7 +18088,7 @@ exports.Pawn = Pawn;
 }.call(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -17987,7 +18121,7 @@ var defaultParams = {
 
 exports['default'] = defaultParams;
 module.exports = exports['default'];
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18123,7 +18257,7 @@ exports['default'] = {
   handleCancel: handleCancel
 };
 module.exports = exports['default'];
-},{"./handle-dom":12,"./handle-swal-dom":14,"./utils":17}],12:[function(require,module,exports){
+},{"./handle-dom":13,"./handle-swal-dom":15,"./utils":18}],13:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18315,7 +18449,7 @@ exports.fadeIn = fadeIn;
 exports.fadeOut = fadeOut;
 exports.fireClick = fireClick;
 exports.stopEventPropagation = stopEventPropagation;
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18395,7 +18529,7 @@ var handleKeyDown = function handleKeyDown(event, params, modal) {
 
 exports['default'] = handleKeyDown;
 module.exports = exports['default'];
-},{"./handle-dom":12,"./handle-swal-dom":14}],14:[function(require,module,exports){
+},{"./handle-dom":13,"./handle-swal-dom":15}],15:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -18563,7 +18697,7 @@ exports.openModal = openModal;
 exports.resetInput = resetInput;
 exports.resetInputError = resetInputError;
 exports.fixVerticalPosition = fixVerticalPosition;
-},{"./default-params":10,"./handle-dom":12,"./injected-html":15,"./utils":17}],15:[function(require,module,exports){
+},{"./default-params":11,"./handle-dom":13,"./injected-html":16,"./utils":18}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -18606,7 +18740,7 @@ var injectedHTML =
 
 exports["default"] = injectedHTML;
 module.exports = exports["default"];
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18832,7 +18966,7 @@ var setParameters = function setParameters(params) {
 
 exports['default'] = setParameters;
 module.exports = exports['default'];
-},{"./handle-dom":12,"./handle-swal-dom":14,"./utils":17}],17:[function(require,module,exports){
+},{"./handle-dom":13,"./handle-swal-dom":15,"./utils":18}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -18906,7 +19040,7 @@ exports.hexToRgb = hexToRgb;
 exports.isIE8 = isIE8;
 exports.logStr = logStr;
 exports.colorLuminance = colorLuminance;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
@@ -19210,4 +19344,4 @@ if (typeof window !== 'undefined') {
   _extend$hexToRgb$isIE8$logStr$colorLuminance.logStr('SweetAlert is a frontend module!');
 }
 module.exports = exports['default'];
-},{"./modules/default-params":10,"./modules/handle-click":11,"./modules/handle-dom":12,"./modules/handle-key":13,"./modules/handle-swal-dom":14,"./modules/set-params":16,"./modules/utils":17}]},{},[1]);
+},{"./modules/default-params":11,"./modules/handle-click":12,"./modules/handle-dom":13,"./modules/handle-key":14,"./modules/handle-swal-dom":15,"./modules/set-params":17,"./modules/utils":18}]},{},[1]);

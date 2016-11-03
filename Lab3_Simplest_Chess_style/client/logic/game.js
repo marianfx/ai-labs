@@ -6,18 +6,20 @@ import {Move} from '../models/move'
 import {Styler} from '../interface/styler'
 import {Player} from './player'
 import {RandomPlayer} from './randomplayer'
+import {HumanPlayer} from './humanplayer'
 
 class Game {
 
     constructor() {
         this.board = new Board();
 
-        this.players = [null, new RandomPlayer(1, this), new RandomPlayer(2, this)]
+        this.players = [null, new RandomPlayer(1, this), new HumanPlayer(2, this)]
 
-        this.styler = new Styler();
-        this.styler.prepareChessBoard();
         this.active_player = 2;
+
+        this.styler = new Styler(this);
         this.styler.currentPlayer = 2;
+        this.styler.prepareChessBoard();
     }
 
     get ActivePlayer() {

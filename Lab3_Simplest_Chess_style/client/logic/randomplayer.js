@@ -28,9 +28,7 @@ class RandomPlayer extends Player{
         var move = possibleMoves[randNr];
 
         this.executeMove(game, move);
-        setTimeout(function(){
-            callback(game);
-        }, 2000);
+        callback(game);
     }
 }
 
