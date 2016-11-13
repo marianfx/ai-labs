@@ -6,7 +6,7 @@ if __name__ == "__main__":
     BPEDIA = DBPediaAgent()
     TEXT = '''At eight o'clock on Thursday morning
                 Arthur didn't feel very good. churches, walking'''
-    TEXT = 'SUN'
+    # TEXT = 'SUN'
     PREPROC = Preprocessor(TEXT)
     TOKENS = PREPROC.get_tokens()
     RESULT = []
@@ -15,9 +15,11 @@ if __name__ == "__main__":
         RESULT.append((token, posibilities))
 
     for resource in RESULT:
+        print("####################")
         print("TEXT TOKEN: " + resource[0])
-        print("DBPEDIA POSIBILITIES:")
+        print("DBPEDIA POSIBILITIES: " + str(len(resource[1])))
+        print("####################")
         for pos in resource[1]:
             print(pos)
-        print("#####################")
-        print("\n\n")
+        print("--------------------")
+        print("\n")

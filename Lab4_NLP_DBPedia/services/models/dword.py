@@ -7,7 +7,7 @@ class DWord(object):
         self.categories = categories
 
     def get_repr(self):
-        output = "Word: " + self.word + "\n"
+        output = "Keyword: " + self.word + "\n"
         output += "Classes: " + str(self.classes) + "\n"
         output += "Categories: " + str(self.categories) + "\n"
         return output
