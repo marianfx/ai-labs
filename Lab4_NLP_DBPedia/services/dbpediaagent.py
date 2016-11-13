@@ -1,12 +1,13 @@
+
 import urllib.request  as url
-from pyquery import PyQuery as pq
 import re
+from pyquery import PyQuery as pq
 
 
-class DBPediaAgent:
+class DBPediaAgent(object):
     '''
-    This is web Agent that create a request to dbpedia api and gets xml response
-    eventually extract data from that xml
+    This is web Agent that creates a request to dbpedia api and gets xml response.
+    Also helps parsing the data from that xml.
     '''
 
     def __init__(self):
@@ -14,9 +15,8 @@ class DBPediaAgent:
 
     def request(self, word):
         '''
-
         :param word: word to search for
-        :return: xml_data from dbpedia apie or None if there is no such a word
+        :return: XML data from dbpedia API or None if there is no such a word
         '''
         dbpedia_xml = None
         adress = self.url_template.format(token=word)

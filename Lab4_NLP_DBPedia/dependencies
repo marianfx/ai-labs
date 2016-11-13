@@ -1,4 +1,0 @@
-pyquery
-    lxml
-nltk
-    after instalation: ntlk.download()

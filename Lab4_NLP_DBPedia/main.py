@@ -1,14 +1,19 @@
-from Lab4_NLP_DBPedia.usefull.DBPedia_agent import DBPediaAgent
-from Lab4_NLP_DBPedia.usefull.Preprocessor import Preprocessor
-if __name__=="__main__":
-    bpedia = DBPediaAgent()
-    text = '''At eight o'clock on Thursday morning
+
+from services.dbpediaagent import DBPediaAgent
+from services.preprocessor import Preprocessor
+
+import nltk
+nltk.download()
+
+if __name__ == "__main__":
+    BPEDIA = DBPediaAgent()
+    TEXT = '''At eight o'clock on Thursday morning
                 Arthur didn't feel very good. churches, walking'''
-    preproc = Preprocessor(text)
-    tokens = preproc.get_tokens()
-    result = []
-    for token in tokens:
-        category = bpedia.process_token(token)
-        result.append((token,category))
+    PREPROC = Preprocessor(TEXT)
+    TOKENS = PREPROC.get_tokens()
+    RESULT = []
+    for token in TOKENS:
+        category = BPEDIA.process_token(token)
+        RESULT.append((token, category))
         print(token)
         print(str(category))
