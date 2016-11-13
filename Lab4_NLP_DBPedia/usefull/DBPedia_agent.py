@@ -1,4 +1,6 @@
 import urllib.request  as url
+from pyquery import PyQuery as pq
+import re
 
 
 class DBPediaAgent:
@@ -33,7 +35,20 @@ class DBPediaAgent:
                  None otherwise
         '''
         xml = self.request(token)
+        xml = xml.decode('utf-8')
         if xml is None:
             return None
-        #       here we parse xml and return category of searched token
+        # here we parse xml and return category of searched token
         #       ...
+
+        # print(xml)
+        r = re.compile('(.+?)<ArrayOfResult .+?>',re.DOTALL)
+        xml = re.sub(r, '<ArrayOfResult>', xml)
+        xml = re.sub("<(.+?)>", lambda match: match.group(0).lower(), xml)
+        # print(xml)
+        d = pq(xml)
+        # need to search more deeply not only first result , and chose most properly ontology
+        first_result = d('result:first')
+        # print(first_result)
+
+        return first_result

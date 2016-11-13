@@ -6,8 +6,9 @@ if __name__=="__main__":
                 Arthur didn't feel very good. churches, walking'''
     preproc = Preprocessor(text)
     tokens = preproc.get_tokens()
-    print('done')
-    print('\n'.join(tokens))
-
-
-
+    result = []
+    for token in tokens:
+        category = bpedia.process_token(token)
+        result.append((token,category))
+        print(token)
+        print(str(category))
