@@ -1,7 +1,10 @@
 
 import urllib.request  as url
+# import os
 import re
 from pyquery import PyQuery as pq
+from .models import dword
+
 
 
 class DBPediaAgent(object):
@@ -24,9 +27,11 @@ class DBPediaAgent(object):
             dbpedia_xml = url.urlopen(adress).read()
         except Exception as e:
             print(e)
+            return None
 
         return dbpedia_xml
 
+    
     def process_token(self, token):
         '''
 
@@ -42,13 +47,49 @@ class DBPediaAgent(object):
         #       ...
 
         # print(xml)
-        r = re.compile('(.+?)<ArrayOfResult .+?>',re.DOTALL)
-        xml = re.sub(r, '<ArrayOfResult>', xml)
+        regex = re.compile('(.+?)<ArrayOfResult .+?>', re.DOTALL)
+        xml = re.sub(regex, '<ArrayOfResult>', xml)
         xml = re.sub("<(.+?)>", lambda match: match.group(0).lower(), xml)
         # print(xml)
-        d = pq(xml)
-        # need to search more deeply not only first result , and chose most properly ontology
-        first_result = d('result:first')
-        # print(first_result)
+        results = pq(xml)
 
-        return first_result
+        # fwrite = open('sample.xml', 'w')
+        # fwrite.write(str(results))
+        # fwrite.flush()
+        # fwrite.close()
+        # need to search more deeply not only first result , and chose most properly ontology
+
+        results = results.children('result')
+        output = []
+        for child in results:
+            word = dword.DWord()
+            child = pq(child)
+            label = child.children('label').eq(0).text()
+            word.word = label
+
+            classes = child.children('classes').eq(0)
+            cvector = self.get_labels_for_children(classes, 'class')
+            word.classes = list(cvector)
+
+            categs = child.children('categories').eq(0)
+            cavector = self.get_labels_for_children(categs, 'category')
+            word.categories = list(cavector)
+
+            output.append(word)
+
+        return output
+
+    def get_labels_for_children(self, node, childrenstring):
+        """Given a xml Element object, and a string for children filtering,
+            returns all the labels of it's direct children.
+        :param node: An XML Element
+        :param childrenstring: A string for children filtering.
+        '"""
+        output = []
+        childs = pq(node).children(childrenstring)
+        for child in childs:
+            child = pq(child)
+            label = child.children('label').eq(0).text()
+            if label is not None:
+                output.append(label)
+        return output
