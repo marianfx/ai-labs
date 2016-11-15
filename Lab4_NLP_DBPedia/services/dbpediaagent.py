@@ -13,8 +13,10 @@ class DBPediaAgent(object):
     Also helps parsing the data from that xml.
     '''
 
-    def __init__(self):
+    def __init__(self, bestResultOnly=True):
         self.url_template = 'http://lookup.dbpedia.org/api/search/KeywordSearch?QueryString={token}'
+        if bestResultOnly is True:
+            self.url_template += '&MaxHits=1'
 
     def request(self, word):
         '''

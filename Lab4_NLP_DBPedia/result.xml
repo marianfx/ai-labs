@@ -1,0 +1,224 @@
+<?xml version="1.0" ?>
+<root>
+  <!--Generated on 2016-11-16 01:52:24.809585 by DbPedia Parser.-->
+  <word>At</word>
+  <word>
+    eight
+    <keyword from="DBPedia" id="1">
+      1984 Summer Olympics
+      <classes>
+        <class>event</class>
+        <class>sports event</class>
+        <class>event</class>
+        <class>sports event</class>
+        <class>owl#Thing</class>
+        <class>olympics</class>
+      </classes>
+      <categories>
+        <category>1984 Summer Olympics</category>
+        <category>Sports in Los Angeles, California</category>
+        <category>Olympic Games in the United States</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    o'clock
+    <keyword from="DBPedia" id="1">
+      BBC News
+      <classes>
+        <class>organisation</class>
+        <class>organization</class>
+        <class>agent</class>
+        <class>owl#Thing</class>
+        <class>company</class>
+      </classes>
+      <categories>
+        <category>Winners of the Sir Arthur Clarke Award</category>
+        <category>Television news in the United Kingdom</category>
+        <category>Multilingual news services</category>
+        <category>BBC World News programmes</category>
+        <category>BBC television news programmes</category>
+        <category>BBC</category>
+        <category>BBC News</category>
+        <category>1922 establishments in the United Kingdom</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>on</word>
+  <word>
+    Thursday
+    <keyword from="DBPedia" id="1">
+      Wall Street Crash of 1929
+      <classes/>
+      <categories>
+        <category>1929 in the United States</category>
+        <category>1929 in international relations</category>
+        <category>Stock market crashes</category>
+        <category>1929 in economics</category>
+        <category>Roaring Twenties</category>
+        <category>Great Depression in the United States</category>
+        <category>Economic bubbles</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    morning
+    <keyword from="DBPedia" id="1">
+      Venus
+      <classes>
+        <class>owl#Thing</class>
+        <class>planet</class>
+        <class>celestial body</class>
+      </classes>
+      <categories>
+        <category>Venus</category>
+        <category>Terrestrial planets</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    Arthur
+    <keyword from="DBPedia" id="1">
+      King Arthur
+      <classes/>
+      <categories>
+        <category>Sub-Roman Britain</category>
+        <category>Burials at Glastonbury Abbey</category>
+        <category>Monomyths</category>
+        <category>Mythological kings</category>
+        <category>Medieval legends</category>
+        <category>People whose existence is disputed</category>
+        <category>Cornish culture</category>
+        <category>Holy Grail</category>
+        <category>Britons of the Southwest</category>
+        <category>Sub-Roman monarchs</category>
+        <category>People in Cornish history</category>
+        <category>Monarchs of Cornwall</category>
+        <category>Knights of the Round Table</category>
+        <category>5th-century births</category>
+        <category>Monty Python characters</category>
+        <category>6th-century deaths</category>
+        <category>British traditional history</category>
+        <category>Welsh monarchs</category>
+        <category>Arthurian characters</category>
+        <category>Welsh mythology</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    do
+    <keyword from="DBPedia" id="1">
+      Rio Grande do Sul
+      <classes>
+        <class>settlement</class>
+        <class>place</class>
+        <class>populated place</class>
+        <class>owl#Thing</class>
+        <class>place</class>
+      </classes>
+      <categories>
+        <category>States of Brazil</category>
+        <category>Rio Grande do Sul</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    n't
+    <keyword from="DBPedia" id="1">
+      Don't Tell Me You Do n't Tell Me You Do 2004 Edition 1
+      <classes>
+        <class>music album</class>
+        <class>album</class>
+        <class>musical work</class>
+        <class>creative work</class>
+        <class>work</class>
+        <class>owl#Thing</class>
+      </classes>
+      <categories/>
+    </keyword>
+  </word>
+  <word>
+    feel
+    <keyword from="DBPedia" id="1">
+      Lil Wayne
+      <classes>
+        <class>http://xmlns.com/foaf/0.1/ person</class>
+        <class>musical artist</class>
+        <class>person</class>
+        <class>artist</class>
+        <class>agent</class>
+        <class>owl#Thing</class>
+        <class>person</class>
+        <class>music group</class>
+      </classes>
+      <categories>
+        <category>American shooting survivors</category>
+        <category>People convicted of drug offenses</category>
+        <category>1982 births</category>
+        <category>Living people</category>
+        <category>African American rappers</category>
+        <category>Southern hip hop musicians</category>
+        <category>Cash Money Records artists</category>
+        <category>Hip hop singers</category>
+        <category>Grammy Award winners</category>
+        <category>Rap rock musicians</category>
+        <category>Lil Wayne</category>
+        <category>American music industry executives</category>
+        <category>World Music Awards winners</category>
+        <category>Young Money Entertainment artists</category>
+        <category>University of Houston alumni</category>
+        <category>People self-identifying as substance abusers</category>
+        <category>Rappers from New Orleans, Louisiana</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    very
+    <keyword from="DBPedia" id="1">
+      Very high frequency
+      <classes/>
+      <categories>
+        <category>Radio spectrum</category>
+        <category>Television terminology</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>
+    good
+    <keyword from="DBPedia" id="1">
+      Health
+      <classes/>
+      <categories>
+        <category>Health</category>
+        <category>Health promotion</category>
+        <category>Personal life</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>.</word>
+  <word>
+    church
+    <keyword from="DBPedia" id="1">
+      Catholic Church
+      <classes/>
+      <categories>
+        <category>Roman Catholic Church</category>
+        <category>Apostolic sees</category>
+        <category>Chalcedonianism</category>
+      </categories>
+    </keyword>
+  </word>
+  <word>,</word>
+  <word>
+    walk
+    <keyword from="DBPedia" id="1">
+      Hiking
+      <classes/>
+      <categories>
+        <category>Hiking</category>
+        <category>Tourist activities</category>
+        <category>Scoutcraft</category>
+      </categories>
+    </keyword>
+  </word>
+</root>

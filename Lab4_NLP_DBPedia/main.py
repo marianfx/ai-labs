@@ -1,25 +1,20 @@
 
 from services.dbpediaagent import DBPediaAgent
 from services.preprocessor import Preprocessor
+from services.processorconsole import ConsoleProcessor
+from services.processorxml import XmlProcessor
 
 if __name__ == "__main__":
-    BPEDIA = DBPediaAgent()
+    BPEDIA = DBPediaAgent(bestResultOnly=True)
     TEXT = '''At eight o'clock on Thursday morning
                 Arthur didn't feel very good. churches, walking'''
     # TEXT = 'SUN'
     PREPROC = Preprocessor(TEXT)
     TOKENS = PREPROC.get_tokens()
-    RESULT = []
+    RESULTS = []
     for token in TOKENS:
         posibilities = BPEDIA.process_token(token)
-        RESULT.append((token, posibilities))
+        RESULTS.append((token, posibilities))
+    PROCESSOR = XmlProcessor(RESULTS)
+    PROCESSOR.process()
 
-    for resource in RESULT:
-        print("####################")
-        print("TEXT TOKEN: " + resource[0])
-        print("DBPEDIA POSIBILITIES: " + str(len(resource[1])))
-        print("####################")
-        for pos in resource[1]:
-            print(pos)
-        print("--------------------")
-        print("\n")

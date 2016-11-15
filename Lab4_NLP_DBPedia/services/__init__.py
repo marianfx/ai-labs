@@ -1,2 +1,2 @@
 
-__all__ = ['dbpediaagent', 'preprocessor', 'wordtest']
+__all__ = ['dbpediaagent', 'preprocessor', 'wordtest', 'processorconsole', 'processorxml']
